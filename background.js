@@ -1,18 +1,19 @@
 chrome.storage.local.get('mode', function(items) {
     const mode = items.mode;
+
     if (mode === 'record') {
       recordingFunction();
     } else if (mode === 'playback') {
-      
+      playbackFunction();
     }
   });
   
 
   const recordingFunction = () => {
     // Record mode: capture request and response data
-    chrome.webRequest.onCompleted.addListener(function(details) {
-        if (details.statusCode >= 200 && details.statusCode < 300) {
-          const url = details.url;
+    chrome.webRequest.onCompleted.addListener(function(response) {
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          const url = response.url;
           const request = new XMLHttpRequest();
           request.open("GET", url, true);
           request.onreadystatechange = function() {
