@@ -19,10 +19,10 @@ chrome.storage.local.get('mode', function(items) {
           request.onreadystatechange = function() {
             if (request.readyState === 4) {
               const response = request.responseText;
-              chrome.storage.local.get('requestData', function(items) {
-                const requestData = items.requestData || {};
-                requestData[url] = response;
-                chrome.storage.local.set({ requestData: requestData });
+              chrome.storage.local.get('recordedRequests', function(items) {
+                const recordedRequests = items.recordedRequests || {};
+                recordedRequests[url] = response;
+                chrome.storage.local.set({ recordedRequests: recordedRequests });
               });
             }
           };
@@ -34,9 +34,9 @@ chrome.storage.local.get('mode', function(items) {
   const playbackFunction = () => {
     // Playback mode: modify response data for matching URLs
     chrome.webRequest.onBeforeRequest.addListener(function(details) {
-        chrome.storage.local.get('requestData', function(items) {
-          const requestData = items.requestData || {};
-          const response = requestData[details.url];
+        chrome.storage.local.get('recordedRequests', function(items) {
+          const recordedRequests = items.recordedRequests || {};
+          const response = recordedRequests[details.url];
           if (response) {
             return { redirectUrl: "data:text/html;charset=utf-8," + encodeURIComponent(response) };
           }
