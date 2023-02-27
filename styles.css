@@ -1,0 +1,7 @@
+#tw-extension body {
+  width: 300px;
+}
+
+.active {
+  color: red;
+}
