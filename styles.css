@@ -2,6 +2,18 @@
   width: 300px;
 }
 
-.active {
+#tw-extension .active {
   color: red;
+}
+
+#tw-extension .load-recordings {
+  display: grid;
+  align-items: center;
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 3px;
+}
+
+#tw-extension select {
+  width: 100%;
 }

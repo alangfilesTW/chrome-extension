@@ -1,23 +1,29 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>TW Demo</title>
+    <title>&#x1F433; Session Recorder</title>
     <link rel="stylesheet" type="text/css" href="./styles.css" />
     <script src="./firebase-app.js"></script>
     <script src="./firebase-firestore.js"></script>
   </head>
   <body id="tw-extension">
-    <h1>TW Demo</h1>
+    <h1>&#x1F433; Session Recorder</h1>
     <button id="record">Record</button>
     <button id="playback">Playback</button>
     <button id="reset">Reset</button>
     <div id="firebase-interactions">
       <br /><br />
       <button id="save">Save to Firebase</button>
+      <span style="display: none" id="success">&#x2705;</span>
+      <span style="display: none" id="error">&#x274C;</span>
       <span id="size"></span>
       <br /><br />
-      <select id="firebase_saves"></select>
-      <button id="load">Load from Firebase</button>
+      <div class="load-recordings">
+        <select id="recordings">
+          <option value="" disabled selected>Select a recording</option>
+        </select>
+        <button id="load">Load from Firebase</button>
+      </div>
     </div>
     <script src="./popup.js" type="module"></script>
   </body>
