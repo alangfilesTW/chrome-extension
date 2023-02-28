@@ -1,9 +1,35 @@
+// ----------
+// Helpers
+// ----------
+function logger(message, color) {
+  color = color || 'black'
+
+  switch (color) {
+    case 'success':
+      color = 'Green'
+      break
+    case 'info':
+      color = 'DodgerBlue'
+      break
+    case 'error':
+      color = 'Red'
+      break
+    case 'warning':
+      color = 'Orange'
+      break
+    default:
+      color = color
+  }
+
+  console.log('%c' + message, 'color:' + color)
+}
+
 function getMode() {
   chrome.storage.local.get('mode', function (items) {
     const mode = items.mode
 
     if (mode === 'record') {
-      console.log('Record mode')
+      logger('Record mode', 'info')
       chrome.webRequest.onCompleted.removeListener(recordingFunction)
       chrome.webRequest.onBeforeRequest.removeListener(playbackFunction)
 
@@ -13,7 +39,7 @@ function getMode() {
         ['responseHeaders'],
       )
     } else if (mode === 'playback') {
-      console.log('Playback mode')
+      logger('Playback mode', 'info')
       chrome.webRequest.onCompleted.removeListener(recordingFunction)
       chrome.webRequest.onBeforeRequest.removeListener(playbackFunction)
 
@@ -25,12 +51,17 @@ function getMode() {
     } else {
       chrome.webRequest.onCompleted.removeListener(recordingFunction)
       chrome.webRequest.onBeforeRequest.removeListener(playbackFunction)
-      console.log('Empty state')
+      logger('Mode not set', 'info')
     }
   })
 }
 
+// ----------
+// Chrome storage
+// ----------
+// Run once initially
 getMode()
+// Update on storage change
 chrome.storage.onChanged.addListener(function (changes, namespace) {
   for (let key in changes) {
     if (key === 'mode') {
@@ -39,13 +70,17 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
   }
 })
 
+// ----------
+// Record Network Requests
+// ----------
 let cachedEndpointRequests = []
 const recordingFunction = function (details) {
   const response = details
   const url = response?.url && response.url?.length > 0 ? response.url : false
 
-  if (!url) return
   if (
+    !url ||
+    !response.frameType ||
     url.includes('chrome-extension://') ||
     url.includes('app.triplewhale.com/static/') ||
     url.includes('posthog') ||
@@ -55,9 +90,12 @@ const recordingFunction = function (details) {
     url.includes('cdn.segment') ||
     url.includes('fast.appcues.com') ||
     url.includes('js.intercomcdn.com') ||
-    url.includes('profitwell')
+    url.includes('profitwell') ||
+    url.includes('stripe.com') ||
+    url.includes('fonts.googleapis.com') ||
+    url.includes('www.google-analytics.com')
   )
-    return
+    return details
 
   const key = `${response.method}:${response.url}`
 
@@ -78,24 +116,32 @@ const recordingFunction = function (details) {
           if (res) {
             recordedRequests[key] = res
             chrome.storage.local.set({ recordedRequests: recordedRequests })
-            console.log(`${response.method} request recorded: ${response.url}`)
+            logger(
+              `${response.method} request recorded: ${response.url}`,
+              'success',
+            )
           }
         })
       })
   }
 }
 
+// ----------
+// Playback Network Requests
+// ----------
 const playbackFunction = function (res) {
   chrome.storage.local.get('recordedRequests', function (items) {
     const recordedRequests = items.recordedRequests || {}
     const response = recordedRequests[`${res.method}:${res.url}`]
     if (response) {
-      console.log(`${res.method} request intercepted: ${res.url}`)
+      logger(`${res.method} request intercepted: ${res.url}`, 'success')
 
       return {
         redirectUrl:
           'data:text/html;charset=utf-8,' + encodeURIComponent(response),
       }
+    } else {
+      return res
     }
   })
 }
