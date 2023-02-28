@@ -83,17 +83,25 @@ const recordingFunction = function (details) {
     !response.frameType ||
     url.includes('chrome-extension://') ||
     url.includes('app.triplewhale.com/static/') ||
+    url.includes('firebaselogging-pa.googleapis.com') ||
+    url.includes('firestore.clients6.google.com') ||
     url.includes('posthog') ||
     url.includes('datadoghq') ||
-    url.includes('intercomcdn') ||
+    url.includes('intercom') ||
     url.includes('inscreen') ||
+    url.includes('amplitude') ||
     url.includes('cdn.segment') ||
     url.includes('fast.appcues.com') ||
     url.includes('js.intercomcdn.com') ||
     url.includes('profitwell') ||
     url.includes('stripe.com') ||
     url.includes('fonts.googleapis.com') ||
-    url.includes('www.google-analytics.com')
+    url.includes('canny.io') ||
+    url.includes('cdn.jsdelivr.net') ||
+    url.includes('api.segment.io') ||
+    url.includes('stripe') ||
+    url.includes('icon.horse/icon') ||
+    url.includes('www.googletagmanager.com')
   )
     return details
 
