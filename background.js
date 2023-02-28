@@ -45,7 +45,19 @@ const recordingFunction = function (details) {
   const url = response?.url && response.url?.length > 0 ? response.url : false
 
   if (!url) return
-  if (url.includes('chrome-extension://')) return
+  if (
+    url.includes('chrome-extension://') ||
+    url.includes('app.triplewhale.com/static/') ||
+    url.includes('posthog') ||
+    url.includes('datadoghq') ||
+    url.includes('intercomcdn') ||
+    url.includes('inscreen') ||
+    url.includes('cdn.segment') ||
+    url.includes('fast.appcues.com') ||
+    url.includes('js.intercomcdn.com') ||
+    url.includes('profitwell')
+  )
+    return
 
   const key = `${response.method}:${response.url}`
 
@@ -85,14 +97,5 @@ const playbackFunction = function (res) {
           'data:text/html;charset=utf-8,' + encodeURIComponent(response),
       }
     }
-  })
-}
-
-const sendRecording = function () {
-  chrome.storage.local.get('recordedRequests', function (items) {
-    const recordedRequests = items.recordedRequests || {}
-
-    // SEND TO FIREBASE
-    console.log(recordedRequests)
   })
 }

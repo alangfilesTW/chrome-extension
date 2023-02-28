@@ -9,6 +9,7 @@
     "128": "images/icon128.png"
   },
   "permissions": [
+    "unlimitedStorage",
     "webRequest",
     "webRequestBlocking",
     "storage",
@@ -16,7 +17,7 @@
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["firebase-app.js", "firebase-firestore.js", "background.js"]
   },
   "web_accessible_resources": ["./styles.css"],
   "browser_action": {

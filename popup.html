@@ -3,15 +3,22 @@
   <head>
     <title>TW Demo</title>
     <link rel="stylesheet" type="text/css" href="./styles.css" />
+    <script src="./firebase-app.js"></script>
+    <script src="./firebase-firestore.js"></script>
   </head>
   <body id="tw-extension">
     <h1>TW Demo</h1>
     <button id="record">Record</button>
     <button id="playback">Playback</button>
     <button id="reset">Reset</button>
-    <br /><br />
-    <button id="save">Save to Firebase</button>
-    <button id="save">Load from Firebase</button>
+    <div id="firebase-interactions">
+      <br /><br />
+      <button id="save">Save to Firebase</button>
+      <span id="size"></span>
+      <br /><br />
+      <select id="firebase_saves"></select>
+      <button id="load">Load from Firebase</button>
+    </div>
     <script src="./popup.js" type="module"></script>
   </body>
 </html>
