@@ -14,7 +14,8 @@ A chrome extension (Manifest v2) to record and replay user sessions, with the ab
 1. Click on the extension icon
 2. Click `Record`
 3. Do your thing
-4. Click on `Replay`
+4. Click on `Playback`
 5. Reload the page
-6. (optional) Click `Push to Firebase` to push the recorded session to Firebase
-7. (optional) Select a session and click `Pull from Firebase` to pull the recorded session from Firebase
+6. (optional) Click `Save to Firebase` to push the recorded session to Firebase
+7. (optional) Select a session and click `Load from Firebase` to pull the recorded session from Firebase
+8. (optional) Click `Clear` to clear the recorded session and start over
