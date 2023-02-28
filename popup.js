@@ -29,11 +29,22 @@ function setSizes() {
 
 function setRecordings(recordings) {
   const recordingsList = document.getElementById('recordings')
+  recordingsList.innerHTML = ''
+
   if (recordings.length > 0) {
+    const disabledOption = document.createElement('option')
+    disabledOption.innerHTML = 'Select a recording'
+    disabledOption.disabled = true
+    disabledOption.selected = true
+    disabledOption.value = ''
+    recordingsList.appendChild(disabledOption)
+
     recordings.forEach((recording) => {
       const option = document.createElement('option')
-      option.innerHTML = toDateTime(recording.date?.seconds)
-      option.value = recording
+      option.innerHTML = `${recording.title} - ${toDateTime(
+        recording.date?.seconds,
+      )}`
+      option.value = JSON.stringify(recording)
       recordingsList.appendChild(option)
     })
   }
@@ -147,40 +158,50 @@ document.addEventListener('DOMContentLoaded', function () {
   })
 
   document.getElementById('save').addEventListener('click', function (e) {
-    console.log('send to firebase')
     e.target.disabled = true
 
     chrome.storage.local.get('recordedRequests', function (items) {
       // @TODO scrub senstiive data
       // email, firstname, lastname, address, phone, etc
+      console.log(items.recordedRequests)
 
-      console.log(db, items.recordedRequests, db && items.recordedRequests)
-
-      if (db && items.recordedRequests) {
-        // @TODO use cloud storage for this file
-        // then reference it below
-        db.collection('recordings')
-          .add({
-            date: new Date(),
-            requests: JSON.stringify(items.recordedRequests),
-          })
-          .then(function (docRef) {
-            showSuccess()
-            console.log('Document written with ID: ', docRef.id)
-            getRecordings(db)
-          })
-          .catch(function (error) {
-            showError()
-            console.error('Error adding document: ', error)
-          })
-          .finally(() => {
-            e.target.disabled = true
-          })
-      }
+      chrome.tabs.getSelected(null, function (tab) {
+        if (db && items.recordedRequests) {
+          // @TODO use cloud storage for this file
+          // then reference it below
+          db.collection('recordings')
+            .add({
+              date: new Date(),
+              title: tab.title,
+              requests: items.recordedRequests,
+            })
+            .then(function (docRef) {
+              showSuccess()
+              console.log('Document written with ID: ', docRef.id)
+              getRecordings(db)
+            })
+            .catch(function (error) {
+              showError()
+              console.error('Error adding document: ', error)
+            })
+            .finally(() => {
+              e.target.disabled = true
+            })
+        }
+      })
     })
   })
 
-  document.getElementById('load').addEventListener('click', function () {
-    console.log('load from firebase')
+  document.getElementById('load').addEventListener('click', function (e) {
+    e.target.disabled = true
+    const recording = document.getElementById('recordings').value
+    const data = JSON.parse(recording)
+
+    if (data && data.requests) {
+      chrome.storage.local.set({ recordedRequests: data.requests })
+      document.getElementById('playback').click()
+    }
+
+    e.target.disabled = false
   })
 })
