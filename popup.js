@@ -1,3 +1,6 @@
+// ----------
+// Helpers
+// ----------
 function formatBytes(bytes, decimals = 2) {
   if (!+bytes) return '0 Bytes'
 
@@ -10,14 +13,76 @@ function formatBytes(bytes, decimals = 2) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
 
-function setSizes(changes) {
-  if (changes && changes.recordedRequests) {
+function toDateTime(secs) {
+  var t = new Date(1970, 0, 1) // Epoch
+  t.setSeconds(secs)
+  return t
+}
+
+function setSizes() {
+  chrome.storage.local.get('recordedRequests', function (items) {
     document.getElementById('size').innerHTML = `&nbsp;&nbsp;${formatBytes(
-      JSON.stringify(changes.recordedRequests).length,
+      JSON.stringify(items.recordedRequests || '').length,
     )}`
+  })
+}
+
+function setRecordings(recordings) {
+  const recordingsList = document.getElementById('recordings')
+  if (recordings.length > 0) {
+    recordings.forEach((recording) => {
+      const option = document.createElement('option')
+      option.innerHTML = toDateTime(recording.date?.seconds)
+      option.value = recording
+      recordingsList.appendChild(option)
+    })
   }
 }
 
+function sanitizeRequests(requests) {
+  return requests.map((request) => {})
+}
+
+function getRecordings(db) {
+  try {
+    db.collection('recordings')
+      .get()
+      .then((snapshot) => {
+        const data = snapshot.docs.map((doc) => doc.data())
+        setRecordings(data)
+      })
+      .catch((error) => {
+        console.error(error)
+        document.getElementById('firebase-interactions').style.display = 'none'
+      })
+  } catch {
+    document.getElementById('firebase-interactions').style.display = 'none'
+  }
+}
+
+function showSuccess() {
+  document.getElementById('error').style.display = 'none'
+
+  const success = document.getElementById('success')
+  success.style.display = 'inline'
+  setTimeout(() => {
+    success.style.display = 'none'
+  }, 3000)
+}
+
+function showError() {
+  document.getElementById('success').style.display = 'none'
+
+  const error = document.getElementById('error')
+  error.style.display = 'inline'
+  setTimeout(() => {
+    error.style.display = 'none'
+  }, 3000)
+}
+
+// ----------
+// Chrome Storage
+// ----------
 chrome.storage.onChanged.addListener(setSizes)
 chrome.storage.local.get('recordedRequests', setSizes)
 chrome.storage.local.get('mode', function (items) {
@@ -30,19 +95,13 @@ chrome.storage.local.get('mode', function (items) {
   }
 })
 
-function setRecordings(recordings) {
-  const recordingsList = document.getElementById('recordings')
-  if (recordings.length > 0) {
-    recordings.forEach((recording) => {
-      const option = document.createElement('option')
-      option.innerHTML = recording
-      option.value = recording.date
-      recordingsList.appendChild(option)
-    })
-  }
-}
-
+// ----------
+// DCL - Needed for Firebase
+// ----------
 document.addEventListener('DOMContentLoaded', function () {
+  // ----------
+  // Firebase
+  // ----------
   let app = false
   let db = false
 
@@ -58,64 +117,64 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     app = firebase.initializeApp(firebaseConfig)
     db = app.firestore()
+    getRecordings(db)
+  } catch {
+    document.getElementById('firebase-interactions').style.display = 'none'
+  }
 
-    db.collection('recordings')
-      .get()
-      .then((snapshot) => {
-        console.log(snapshot)
-      })
-      .catch((error) => {
-        console.error(error)
-        document.getElementById('firebase-interactions').style.display = 'none'
-      })
-  } catch {}
-
-  console.log(db)
-
+  // ----------
+  // Event Listeners
+  // ----------
   document.getElementById('record').addEventListener('click', function () {
     chrome.storage.local.set({ mode: 'record' })
     document.getElementById('record').classList.add('active')
     document.getElementById('playback').classList.remove('active')
+    setSizes()
   })
 
   document.getElementById('playback').addEventListener('click', function () {
     chrome.storage.local.set({ mode: 'playback' })
     document.getElementById('playback').classList.add('active')
     document.getElementById('record').classList.remove('active')
+    setSizes()
   })
 
   document.getElementById('reset').addEventListener('click', function () {
     chrome.storage.local.clear()
     document.getElementById('playback').classList.remove('active')
     document.getElementById('record').classList.remove('active')
+    setSizes()
   })
 
-  document.getElementById('save').addEventListener('click', function () {
+  document.getElementById('save').addEventListener('click', function (e) {
     console.log('send to firebase')
+    e.target.disabled = true
 
-    chrome.storage.local.get('recordedRequests', function (recordedRequests) {
+    chrome.storage.local.get('recordedRequests', function (items) {
       // @TODO scrub senstiive data
       // email, firstname, lastname, address, phone, etc
 
-      console.log(
-        db,
-        recordedRequests.recordedRequests,
-        db && recordedRequests.recordedRequests,
-      )
+      console.log(db, items.recordedRequests, db && items.recordedRequests)
 
-      if (db && recordedRequests.recordedRequests) {
-        // @TODO need to use cloud storage for this file
+      if (db && items.recordedRequests) {
+        // @TODO use cloud storage for this file
         // then reference it below
         db.collection('recordings')
           .add({
             date: new Date(),
-            requests: JSON.stringify(recordedRequests.recordedRequests),
+            requests: JSON.stringify(items.recordedRequests),
           })
           .then(function (docRef) {
+            showSuccess()
             console.log('Document written with ID: ', docRef.id)
+            getRecordings(db)
           })
           .catch(function (error) {
+            showError()
             console.error('Error adding document: ', error)
+          })
+          .finally(() => {
+            e.target.disabled = true
           })
       }
     })
