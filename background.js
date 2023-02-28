@@ -33,6 +33,11 @@ function getMode() {
       chrome.webRequest.onCompleted.removeListener(recordingFunction)
       chrome.webRequest.onBeforeRequest.removeListener(playbackFunction)
 
+      chrome.webRequest.onBeforeSendHeaders.addListener(
+        addHashToRequest,
+        { urls: ['<all_urls>'] },
+        ['blocking'],
+      )
       chrome.webRequest.onCompleted.addListener(
         recordingFunction,
         { urls: ['<all_urls>'] },
@@ -70,6 +75,23 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
   }
 })
 
+const addHashToRequest = async function (details) {
+  // Hash the string using SHA-256
+  const hash = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(config.data),
+  )
+  const hashArray = Array.from(new Uint8Array(hash)) // Convert the hash result to an array of integers
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('') // Convert the integers to a hexadecimal string
+
+  return {
+    requestHeaders: [
+      ...details.requestHeaders,
+      { name: 'x-data-hash', value: hashHex },
+    ],
+  }
+}
+
 // ----------
 // Record Network Requests
 // ----------
@@ -77,6 +99,7 @@ let cachedEndpointRequests = []
 const recordingFunction = function (details) {
   const response = details
   const url = response?.url && response.url?.length > 0 ? response.url : false
+  console.log(response)
 
   if (
     !url ||
