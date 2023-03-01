@@ -53,7 +53,7 @@ function getMode() {
       chrome.webRequest.onBeforeSendHeaders.addListener(
         recordingFunction,
         { types: ['xmlhttprequest'], urls: ['<all_urls>'] },
-        ['blocking', 'extraHeaders', 'requestHeaders'],
+        ['blocking', 'requestHeaders'],
       )
     } else if (mode === 'playback') {
       logger('Playback mode', 'info')
@@ -205,22 +205,22 @@ const recordingFunction = function (details) {
 // ----------
 // Playback Network Requests
 // ----------
-const playbackFunction = function (res) {
-  if (!isGoodRequest(res.url, res.method)) return res
-  if (Object.keys(recordedRequests).length === 0) return res
+const playbackFunction = function (req) {
+  if (!isGoodRequest(req.url, req.method)) return
+  if (Object.keys(recordedRequests).length === 0) return
 
-  const key = generateKey(res)
-  if (!key) return res
+  const key = generateKey(req)
+  if (!key) return
 
-  const response = recordedRequests[generateKey(res)]
-  if (response && !response.message) {
-    logger(`${res.method} request intercepted: ${res.url}`, 'success')
+  const recordedResponse = recordedRequests[generateKey(req)]
+  if (recordedResponse && !recordedResponse.message) {
+    logger(`${req.method} request intercepted: ${req.url}`, 'success')
 
     return {
       redirectUrl:
-        'data:text/html;charset=utf-8,' + encodeURIComponent(response),
+        'data:text/html;charset=utf-8,' + encodeURIComponent(recordedResponse),
     }
   }
 
-  return res
+  return
 }
