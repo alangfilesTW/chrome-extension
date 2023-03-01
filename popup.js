@@ -174,6 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     chrome.storage.local.get('recordedRequests', function (items) {
       const sanitizedRequests = sanitizeRequests(items.recordedRequests)
+      chrome.storage.local.set({ recordedRequests: sanitizedRequests })
       chrome.tabs.getSelected(null, function (tab) {
         if (db && items.recordedRequests) {
           // @TODO - Improvement
