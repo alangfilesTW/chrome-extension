@@ -24,67 +24,63 @@ function logger(message, color) {
   console.log('%c' + message, 'color:' + color)
 }
 
+function convertHeadersArrayToObject(array) {
+  const newObj = {}
+
+  array.forEach((header) => {
+    newObj[header.name] = header.value
+  })
+
+  return newObj
+}
+
 function getMode() {
   chrome.storage.local.get('mode', function (items) {
+    chrome.webRequest.onBeforeRequest.removeListener(bodyRecordingFunction)
+    chrome.webRequest.onBeforeSendHeaders.removeListener(recordingFunction)
+    chrome.webRequest.onBeforeRequest.removeListener(playbackFunction)
+
     const mode = items.mode
 
     if (mode === 'record') {
       logger('Record mode', 'info')
-      chrome.webRequest.onCompleted.removeListener(recordingFunction)
-      chrome.webRequest.onBeforeRequest.removeListener(playbackFunction)
-
-      chrome.webRequest.onCompleted.addListener(
+      chrome.webRequest.onBeforeRequest.addListener(
+        bodyRecordingFunction,
+        { types: ['xmlhttprequest'], urls: ['<all_urls>'] },
+        ['blocking', 'extraHeaders', 'requestBody'],
+      )
+      chrome.webRequest.onBeforeSendHeaders.addListener(
         recordingFunction,
-        { urls: ['<all_urls>'] },
-        ['responseHeaders'],
+        { types: ['xmlhttprequest'], urls: ['<all_urls>'] },
+        ['blocking', 'extraHeaders', 'requestHeaders'],
       )
     } else if (mode === 'playback') {
       logger('Playback mode', 'info')
-      chrome.webRequest.onCompleted.removeListener(recordingFunction)
-      chrome.webRequest.onBeforeRequest.removeListener(playbackFunction)
-
       chrome.webRequest.onBeforeRequest.addListener(
         playbackFunction,
-        { urls: ['<all_urls>'] },
+        { types: ['xmlhttprequest'], urls: ['<all_urls>'] },
         ['blocking'],
       )
     } else {
-      chrome.webRequest.onCompleted.removeListener(recordingFunction)
-      chrome.webRequest.onBeforeRequest.removeListener(playbackFunction)
       logger('Mode not set', 'info')
     }
   })
 }
 
-// ----------
-// Chrome storage
-// ----------
-// Run once initially
-getMode()
-// Update on storage change
-chrome.storage.onChanged.addListener(function (changes, namespace) {
-  for (let key in changes) {
-    if (key === 'mode') {
-      getMode()
-    }
-  }
-})
+function generateKey(details) {
+  return `${details.method}:${details.url}`
+}
 
-// ----------
-// Record Network Requests
-// ----------
-let cachedEndpointRequests = []
-const recordingFunction = function (details) {
-  const response = details
-  const url = response?.url && response.url?.length > 0 ? response.url : false
-
+function isGoodRequest(url, method) {
   if (
     !url ||
-    !response.frameType ||
     url.includes('chrome-extension://') ||
     url.includes('app.triplewhale.com/static/') ||
     url.includes('firebaselogging-pa.googleapis.com') ||
-    url.includes('firestore.clients6.google.com') ||
+    url.includes('lotties') ||
+    url.includes('firestore') ||
+    url.includes('google-analytics') ||
+    url.includes('play.google') ||
     url.includes('posthog') ||
     url.includes('datadoghq') ||
     url.includes('intercom') ||
@@ -100,37 +96,109 @@ const recordingFunction = function (details) {
     url.includes('cdn.jsdelivr.net') ||
     url.includes('api.segment.io') ||
     url.includes('stripe') ||
-    url.includes('icon.horse/icon') ||
-    url.includes('www.googletagmanager.com')
+    (method && method === 'OPTIONS')
   )
-    return details
+    return false
 
-  const key = `${response.method}:${response.url}`
+  return true
+}
+
+// ----------
+// Chrome storage
+// ----------
+// Run once initially
+getMode()
+// Update on storage change
+chrome.storage.onChanged.addListener(function (changes) {
+  for (let key in changes) {
+    if (key === 'mode') {
+      getMode()
+    }
+  }
+})
+
+// ----------
+// Record Network Requests
+// ----------
+let cachedEndpointBodies = {}
+const bodyRecordingFunction = function (details) {
+  console.log(details)
+
+  const url =
+    details && details.url && details.url?.length > 0 ? details.url : false
+  const method = details && details.method ? details.method : false
 
   if (
-    url &&
-    response?.statusCode >= 200 &&
-    response?.statusCode < 300 &&
-    !cachedEndpointRequests.includes(key)
+    isGoodRequest(url, method) &&
+    details.method === 'POST' &&
+    details.requestBody &&
+    details.requestBody.raw &&
+    details.requestBody.raw[0] &&
+    details.requestBody.raw[0].bytes &&
+    !details.error
   ) {
-    cachedEndpointRequests.push(key)
+    const key = generateKey(details)
 
-    fetch(response.url)
-      .then((response) => response.text())
-      .then((res) => {
-        chrome.storage.local.get('recordedRequests', function (items) {
-          const recordedRequests = items.recordedRequests || {}
+    try {
+      cachedEndpointBodies[key] = JSON.parse(
+        decodeURIComponent(
+          String.fromCharCode.apply(
+            null,
+            new Uint8Array(details.requestBody.raw[0].bytes),
+          ),
+        ),
+      )
+    } catch (e) {
+      logger(`Error parsing body: ${e}`, 'error')
+    }
+  }
+}
 
-          if (res) {
-            recordedRequests[key] = res
-            chrome.storage.local.set({ recordedRequests: recordedRequests })
-            logger(
-              `${response.method} request recorded: ${response.url}`,
-              'success',
-            )
-          }
+let cachedEndpointRequests = []
+const recordingFunction = function (details) {
+  const url =
+    details && details.url && details.url?.length > 0 ? details.url : false
+  const method = details && details.method ? details.method : false
+
+  if (isGoodRequest(url, method)) {
+    const key = generateKey(details)
+
+    if (!cachedEndpointRequests.includes(key)) {
+      cachedEndpointRequests.push(key)
+
+      var params = {
+        method: method,
+      }
+
+      if (method === 'POST' && cachedEndpointBodies[key]) {
+        params.body = JSON.stringify(cachedEndpointBodies[key])
+
+        if (details.requestHeaders) {
+          params.headers = convertHeadersArrayToObject(details.requestHeaders)
+        }
+      }
+
+      fetch(details.url, params)
+        .then((response) => response.text())
+        .then((res) => {
+          chrome.storage.local.get('recordedRequests', function (items) {
+            const recordedRequests = items.recordedRequests || {}
+
+            if (res && !res.error) {
+              recordedRequests[key] = res
+              chrome.storage.local.set({ recordedRequests: recordedRequests })
+              logger(
+                `${details.method} request recorded: ${details.url}`,
+                'success',
+              )
+            } else {
+              cachedEndpointRequests = cachedEndpointRequests.filter(
+                (item) => item !== key,
+              )
+            }
+          })
         })
-      })
+    }
   }
 }
 
