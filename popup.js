@@ -181,6 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
           // use cloud storage for this file
           // if greater than 1mb
           // then reference it below
+          // https://firebase.google.com/docs/storage/web/upload-files
           db.collection('recordings')
             .add({
               date: new Date(),
@@ -223,8 +224,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      chrome.tabs.reload(tabs[0].id)
-      window.close()
+      chrome.tabs.reload(tabs[0].id, { bypassCache: true }, function () {
+        window.close()
+      })
     })
   })
 })
