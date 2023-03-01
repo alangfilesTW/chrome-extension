@@ -186,6 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .add({
               date: new Date(),
               title: tab.title,
+              url: tab.url,
               requests: sanitizedRequests,
             })
             .then(function (docRef) {
@@ -224,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      chrome.tabs.reload(tabs[0].id, { bypassCache: true }, function () {
+      chrome.tabs.update(tabs[0].id, { url: data.url }, function () {
         window.close()
       })
     })
