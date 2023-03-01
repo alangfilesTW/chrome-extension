@@ -52,14 +52,19 @@ function setRecordings(recordings) {
 
 function sanitizeRequests(requests) {
   let req = requests
-  let keys = ['firstName', 'lastName', 'email']
+  let keys = ['firstName', 'lastName', 'email', 'createdBy', 'updatedBy']
 
   Object.keys(req).forEach((key) => {
     keys.forEach((k) => {
-      if (!k.includes('pnl') && req[key].includes(k)) {
-        const re = new RegExp(`"${k}":\s*"[^"]+?([^\/"]+)"`, 'g')
-        req[key] = req[key].replace(re, `"${k}":"[REDACTED]"`)
-      }
+      try {
+        if (!k.includes('pnl') && req[key].includes(k)) {
+          const re = new RegExp(`"${k}":\s*"[^"]+?([^\/"]+)"`, 'g')
+          req[key] = req[key].replaceAll(re, `"${k}":"[REDACTED]"`)
+
+          const re2 = new RegExp(`\"${k}\":\s*\"[^"]+?([^\/"]+)\"`, 'g')
+          req[key] = req[key].replaceAll(re2, `"${k}":"[REDACTED]"`)
+        }
+      } catch {}
     })
   })
 
