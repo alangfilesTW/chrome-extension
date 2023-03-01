@@ -48,6 +48,7 @@ function getMode() {
 
     if (mode === 'record') {
       logger('Record mode', 'info')
+      chrome.storage.local.set({ recordedRequests: {} })
       chrome.webRequest.onBeforeRequest.addListener(
         bodyRecordingFunction,
         { types: ['xmlhttprequest'], urls: ['<all_urls>'] },

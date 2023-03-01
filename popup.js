@@ -170,6 +170,8 @@ document.addEventListener('DOMContentLoaded', function () {
   })
 
   document.getElementById('save').addEventListener('click', function (e) {
+    e.target.disabled = true
+
     chrome.storage.local.get('recordedRequests', function (items) {
       const sanitizedRequests = sanitizeRequests(items.recordedRequests)
       chrome.tabs.getSelected(null, function (tab) {
@@ -192,6 +194,11 @@ document.addEventListener('DOMContentLoaded', function () {
               showError()
               console.error('Error adding document: ', error)
             })
+            .finally(() => {
+              e.target.disabled = false
+            })
+        } else {
+          e.target.disabled = false
         }
       })
     })
@@ -207,6 +214,9 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('playback').click()
     }
 
-    e.target.disabled = false
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.reload(tabs[0].id)
+      window.close()
+    })
   })
 })
