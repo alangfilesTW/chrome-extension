@@ -133,7 +133,7 @@ const bodyRecordingFunction = function (details) {
     details.requestBody.raw &&
     details.requestBody.raw[0] &&
     details.requestBody.raw[0].bytes &&
-    !details.error
+    !details.message
   ) {
     const key = generateKey(details)
 
