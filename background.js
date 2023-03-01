@@ -34,6 +34,7 @@ function convertHeadersArrayToObject(array) {
   return newObj
 }
 
+let recordedRequests = {}
 function getMode() {
   chrome.storage.local.get('mode', function (items) {
     chrome.webRequest.onBeforeRequest.removeListener(bodyRecordingFunction)
@@ -56,11 +57,14 @@ function getMode() {
       )
     } else if (mode === 'playback') {
       logger('Playback mode', 'info')
-      chrome.webRequest.onBeforeRequest.addListener(
-        playbackFunction,
-        { types: ['xmlhttprequest'], urls: ['<all_urls>'] },
-        ['blocking'],
-      )
+      chrome.storage.local.get('recordedRequests', function (items) {
+        recordedRequests = items.recordedRequests || {}
+        chrome.webRequest.onBeforeRequest.addListener(
+          playbackFunction,
+          { types: ['xmlhttprequest'], urls: ['<all_urls>'] },
+          ['blocking'],
+        )
+      })
     } else {
       logger('Mode not set', 'info')
     }
@@ -72,8 +76,9 @@ function generateKey(details) {
 }
 
 function isGoodRequest(url, method) {
+  if (!url || url.includes('chrome')) return false
   if (method && method === 'OPTIONS') return false
-  if (url && url.includes('api.triplewhale.com')) return true
+  if (url.includes('api.triplewhale.com')) return true
   return false
 }
 
@@ -201,18 +206,21 @@ const recordingFunction = function (details) {
 // Playback Network Requests
 // ----------
 const playbackFunction = function (res) {
-  chrome.storage.local.get('recordedRequests', function (items) {
-    const recordedRequests = items.recordedRequests || {}
-    const response = recordedRequests[generateKey(res)]
-    if (response) {
-      logger(`${res.method} request intercepted: ${res.url}`, 'success')
+  if (!isGoodRequest(res.url, res.method)) return res
+  if (Object.keys(recordedRequests).length === 0) return res
 
-      return {
-        redirectUrl:
-          'data:text/html;charset=utf-8,' + encodeURIComponent(response),
-      }
-    } else {
-      return res
+  const key = generateKey(res)
+  if (!key) return res
+
+  const response = recordedRequests[generateKey(res)]
+  if (response) {
+    logger(`${res.method} request intercepted: ${res.url}`, 'success')
+
+    return {
+      redirectUrl:
+        'data:text/html;charset=utf-8,' + encodeURIComponent(response),
     }
-  })
+  }
+
+  return res
 }
