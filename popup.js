@@ -24,12 +24,6 @@ function setSizes() {
     document.getElementById('size').innerHTML = `&nbsp;&nbsp;${formatBytes(
       JSON.stringify(items.recordedRequests || '').length,
     )} in-cache`
-
-    const keysSize = Object.keys(items.recordedRequests || {}).length
-    console.log(keysSize)
-    chrome.browserAction.setBadgeText({
-      text: `${keysSize > 0 ? keysSize : ''}`,
-    })
   })
 }
 

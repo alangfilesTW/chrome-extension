@@ -104,6 +104,15 @@ function getToken(headers) {
   })
 }
 
+function setBadgeText() {
+  chrome.storage.local.get('recordedRequests', function (items) {
+    const keysSize = Object.keys(items.recordedRequests || {}).length
+    chrome.browserAction.setBadgeText({
+      text: `${keysSize > 0 ? keysSize : ''}`,
+    })
+  })
+}
+
 // ----------
 // Chrome storage
 // ----------
@@ -117,6 +126,8 @@ chrome.storage.onChanged.addListener(function (changes) {
     }
   }
 })
+
+chrome.storage.onChanged.addListener(setBadgeText)
 
 // ----------
 // Record Network Requests
