@@ -170,11 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
   })
 
   document.getElementById('save').addEventListener('click', function (e) {
-    // e.target.disabled = true
-
     chrome.storage.local.get('recordedRequests', function (items) {
-      // @TODO scrub senstiive data
-      // email, firstname, lastname, address, phone, etc
       const sanitizedRequests = sanitizeRequests(items.recordedRequests)
       chrome.tabs.getSelected(null, function (tab) {
         if (db && items.recordedRequests) {
@@ -195,9 +191,6 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(function (error) {
               showError()
               console.error('Error adding document: ', error)
-            })
-            .finally(() => {
-              e.target.disabled = true
             })
         }
       })

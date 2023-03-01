@@ -192,7 +192,7 @@ const recordingFunction = function (details) {
               chrome.storage.local.set({ recordedRequests: recordedRequests })
               logger(
                 `${details.method} request recorded: ${details.url}`,
-                'success',
+                'warning',
               )
             } else {
               cachedEndpointRequests = cachedEndpointRequests.filter(
