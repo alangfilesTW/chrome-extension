@@ -51,7 +51,19 @@ function setRecordings(recordings) {
 }
 
 function sanitizeRequests(requests) {
-  return requests.map((request) => {})
+  let req = requests
+  let keys = ['firstName', 'lastName', 'email', 'shop', 'name']
+
+  Object.keys(req).forEach((key) => {
+    keys.forEach((k) => {
+      if (!k.includes('pnl') && req[key].includes(k)) {
+        const re = new RegExp(`"${k}":\s*"[^"]+?([^\/"]+)"`, 'g')
+        req[key] = req[key].replace(re, `"${k}":"[REDACTED]"`)
+      }
+    })
+  })
+
+  return req
 }
 
 function getRecordings(db) {
@@ -158,22 +170,22 @@ document.addEventListener('DOMContentLoaded', function () {
   })
 
   document.getElementById('save').addEventListener('click', function (e) {
-    e.target.disabled = true
+    // e.target.disabled = true
 
     chrome.storage.local.get('recordedRequests', function (items) {
       // @TODO scrub senstiive data
       // email, firstname, lastname, address, phone, etc
-      console.log(items.recordedRequests)
-
+      const sanitizedRequests = sanitizeRequests(items.recordedRequests)
       chrome.tabs.getSelected(null, function (tab) {
         if (db && items.recordedRequests) {
-          // @TODO use cloud storage for this file
+          // @TODO - Improvement
+          // use cloud storage for this file
           // then reference it below
           db.collection('recordings')
             .add({
               date: new Date(),
               title: tab.title,
-              requests: items.recordedRequests,
+              requests: sanitizedRequests,
             })
             .then(function (docRef) {
               showSuccess()
