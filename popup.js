@@ -52,7 +52,7 @@ function setRecordings(recordings) {
 
 function sanitizeRequests(requests) {
   let req = requests
-  let keys = ['firstName', 'lastName', 'email', 'shop', 'name']
+  let keys = ['firstName', 'lastName', 'email', 'name']
 
   Object.keys(req).forEach((key) => {
     keys.forEach((k) => {
