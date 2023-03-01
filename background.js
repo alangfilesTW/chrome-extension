@@ -37,6 +37,9 @@ function convertHeadersArrayToObject(array) {
 let recordedRequests = {}
 function getMode() {
   chrome.storage.local.get('mode', function (items) {
+    recordedRequests = {}
+    cachedEndpointBodies = {}
+    cachedEndpointRequests = []
     chrome.webRequest.onBeforeRequest.removeListener(bodyRecordingFunction)
     chrome.webRequest.onBeforeSendHeaders.removeListener(recordingFunction)
     chrome.webRequest.onBeforeRequest.removeListener(playbackFunction)
