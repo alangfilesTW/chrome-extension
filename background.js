@@ -49,6 +49,7 @@ function getMode() {
     if (mode === 'record') {
       logger('Record mode', 'info')
       chrome.storage.local.set({ recordedRequests: {} })
+      chrome.browserAction.setBadgeBackgroundColor({ color: '#c63e25' })
       chrome.webRequest.onBeforeRequest.addListener(
         bodyRecordingFunction,
         { types: ['xmlhttprequest'], urls: ['<all_urls>'] },
@@ -61,6 +62,7 @@ function getMode() {
       )
     } else if (mode === 'playback') {
       logger('Playback mode', 'info')
+      chrome.browserAction.setBadgeBackgroundColor({ color: '#008256' })
       chrome.storage.local.get('recordedRequests', function (items) {
         recordedRequests = items.recordedRequests || {}
         chrome.webRequest.onBeforeRequest.addListener(

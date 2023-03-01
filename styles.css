@@ -3,11 +3,11 @@
 }
 
 #tw-extension .active {
-  color: red;
+  color: #c63e25;
 }
 
 #tw-extension #playback.active {
-  color: green;
+  color: #008256;
 }
 
 #tw-extension .load-recordings {
