@@ -76,7 +76,8 @@ function isGoodRequest(url, method) {
     !url ||
     url.includes('chrome-extension://') ||
     url.includes('app.triplewhale.com/static/') ||
-    url.includes('firebaselogging-pa.googleapis.com') ||
+    url.includes('firebaselogging') ||
+    url.includes('firebasestorage') ||
     url.includes('lotties') ||
     url.includes('firestore') ||
     url.includes('google-analytics') ||
@@ -101,6 +102,22 @@ function isGoodRequest(url, method) {
     return false
 
   return true
+}
+
+function setDefaultToken(headers) {
+  if (headers && headers.Authorization) {
+    chrome.storage.local.set({ token: headers.Authorization })
+  }
+}
+
+function getToken(headers) {
+  if (headers && headers.Authorization) {
+    return headers.Authorization
+  }
+
+  return chrome.storage.local.get('token', function (items) {
+    return items.token
+  })
 }
 
 // ----------
@@ -160,6 +177,7 @@ const recordingFunction = function (details) {
 
   if (isGoodRequest(url, method)) {
     const key = generateKey(details)
+    let token = getToken(details.requestHeaders)
 
     if (!cachedEndpointRequests.includes(key)) {
       cachedEndpointRequests.push(key)
@@ -168,12 +186,18 @@ const recordingFunction = function (details) {
         method: method,
       }
 
+      if (details.requestHeaders) {
+        if (url.includes('https://api.triplewhale.com/') && !token) {
+          setDefaultToken(details.requestHeaders)
+          token = getToken(details.requestHeaders)
+        }
+
+        if (token) params.headers.Authorization = token
+        params.headers = convertHeadersArrayToObject(details.requestHeaders)
+      }
+
       if (method === 'POST' && cachedEndpointBodies[key]) {
         params.body = JSON.stringify(cachedEndpointBodies[key])
-
-        if (details.requestHeaders) {
-          params.headers = convertHeadersArrayToObject(details.requestHeaders)
-        }
       }
 
       fetch(details.url, params)
@@ -206,7 +230,7 @@ const recordingFunction = function (details) {
 const playbackFunction = function (res) {
   chrome.storage.local.get('recordedRequests', function (items) {
     const recordedRequests = items.recordedRequests || {}
-    const response = recordedRequests[`${res.method}:${res.url}`]
+    const response = recordedRequests[generateKey(res)]
     if (response) {
       logger(`${res.method} request intercepted: ${res.url}`, 'success')
 
