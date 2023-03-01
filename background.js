@@ -122,8 +122,6 @@ chrome.storage.onChanged.addListener(function (changes) {
 // ----------
 let cachedEndpointBodies = {}
 const bodyRecordingFunction = function (details) {
-  console.log(details)
-
   const url =
     details && details.url && details.url?.length > 0 ? details.url : false
   const method = details && details.method ? details.method : false
