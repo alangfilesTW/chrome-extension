@@ -72,36 +72,9 @@ function generateKey(details) {
 }
 
 function isGoodRequest(url, method) {
-  if (
-    !url ||
-    url.includes('chrome-extension://') ||
-    url.includes('app.triplewhale.com/static/') ||
-    url.includes('firebaselogging') ||
-    url.includes('firebasestorage') ||
-    url.includes('lotties') ||
-    url.includes('firestore') ||
-    url.includes('google-analytics') ||
-    url.includes('play.google') ||
-    url.includes('posthog') ||
-    url.includes('datadoghq') ||
-    url.includes('intercom') ||
-    url.includes('inscreen') ||
-    url.includes('amplitude') ||
-    url.includes('cdn.segment') ||
-    url.includes('fast.appcues.com') ||
-    url.includes('js.intercomcdn.com') ||
-    url.includes('profitwell') ||
-    url.includes('stripe.com') ||
-    url.includes('fonts.googleapis.com') ||
-    url.includes('canny.io') ||
-    url.includes('cdn.jsdelivr.net') ||
-    url.includes('api.segment.io') ||
-    url.includes('stripe') ||
-    (method && method === 'OPTIONS')
-  )
-    return false
-
-  return true
+  if (method && method === 'OPTIONS') return false
+  if (url && url.includes('api.triplewhale.com')) return true
+  return false
 }
 
 function setDefaultToken(headers) {
