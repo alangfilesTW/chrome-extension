@@ -213,7 +213,7 @@ const playbackFunction = function (res) {
   if (!key) return res
 
   const response = recordedRequests[generateKey(res)]
-  if (response) {
+  if (response && !response.message) {
     logger(`${res.method} request intercepted: ${res.url}`, 'success')
 
     return {
