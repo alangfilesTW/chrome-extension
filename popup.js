@@ -23,7 +23,7 @@ function setSizes() {
   chrome.storage.local.get('recordedRequests', function (items) {
     document.getElementById('size').innerHTML = `&nbsp;&nbsp;${formatBytes(
       JSON.stringify(items.recordedRequests || '').length,
-    )}`
+    )} in-cache`
   })
 }
 
@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (db && items.recordedRequests) {
           // @TODO - Improvement
           // use cloud storage for this file
+          // if greater than 1mb
           // then reference it below
           db.collection('recordings')
             .add({
@@ -203,6 +204,12 @@ document.addEventListener('DOMContentLoaded', function () {
       })
     })
   })
+
+  document
+    .getElementById('recordings')
+    .addEventListener('change', function (e) {
+      document.getElementById('load').disabled = false
+    })
 
   document.getElementById('load').addEventListener('click', function (e) {
     e.target.disabled = true

@@ -6,6 +6,10 @@
   color: red;
 }
 
+#tw-extension #playback.active {
+  color: green;
+}
+
 #tw-extension .load-recordings {
   display: grid;
   align-items: center;
