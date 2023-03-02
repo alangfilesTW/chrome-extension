@@ -13,12 +13,6 @@ function formatBytes(bytes, decimals = 2) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
 
-function toDateTime(secs) {
-  var t = new Date(1970, 0, 1) // Epoch
-  t.setSeconds(secs)
-  return t
-}
-
 function setSizes() {
   chrome.storage.local.get('recordedRequests', function (items) {
     document.getElementById('size').innerHTML = `&nbsp;&nbsp;${formatBytes(
@@ -52,7 +46,7 @@ function setRecordings(recordings) {
       const option = document.createElement('option')
       option.innerHTML = `${
         recording.url.split('.com/')[1].split('/')[0].split('?')[0]
-      } - ${toDateTime(recording.date?.seconds).toString().split(' GMT')[0]}`
+      } - ${recording.date.toDate().toLocaleString('en-US')}`
       option.value = JSON.stringify(recording)
       recordingsList.appendChild(option)
     })
@@ -72,6 +66,8 @@ function sanitizeRequests(requests) {
     'last_name',
     'address1',
     'address2',
+    'campaignName',
+    'adsetName',
   ]
 
   Object.keys(req).forEach((key) => {

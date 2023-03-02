@@ -36,7 +36,7 @@ function wrapRedacted() {
 
   ;['[REDACTED]', '[REDACTED] [REDACTED]', shopName].forEach(function (text) {
     const redactedText = contains(
-      'h1, h2, h3, h4, h5, h6, p, div, span, button, a',
+      'h1, h2, h3, h4, h5, h6, p, div, span, button, a, text',
       text,
     )
     redactedText.forEach(function (element) {
