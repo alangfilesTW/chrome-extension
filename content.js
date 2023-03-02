@@ -8,7 +8,9 @@ function contains(selector, text) {
     return RegExp(text).test(
       Array.from(element.childNodes)
         .map(function (e) {
-          return e.nodeType === 3 ? e.textContent.trim() : ''
+          return e.nodeType === 3 && e.textContent.trim().includes(text)
+            ? e.textContent.trim()
+            : ''
         })
         .join(''),
     )
@@ -16,7 +18,7 @@ function contains(selector, text) {
 }
 
 function wrapRedacted() {
-  const redactedText = contains('h1, h2, h3, h4, h5, h6, p', '[REDACTED]')
+  const redactedText = contains('h1, h2, h3, h4, h5, h6, p, div', '[REDACTED]')
   redactedText.forEach(function (element) {
     if ((element.getAttribute('data-id') || '').includes('redacted')) return
     element.setAttribute('data-id', 'redacted')
@@ -30,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var styleSheet = document.createElement('style')
   styleSheet.innerText = `
     [data-id="redacted"] {
-      filter: blur(5px);
+      filter: blur(3px);
     }
   `
   document.head.appendChild(styleSheet)
