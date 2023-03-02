@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 chrome.storage.onChanged.addListener(function (changes) {
   for (let key in changes) {
-    if (key === 'mode') {
+    if (key === 'mode' && changes[key] === 'playback') {
       makeObserver(changes)
     } else if (observer) {
       observer.disconnect()

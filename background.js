@@ -74,8 +74,6 @@ function getMode() {
       chrome.storage.local.set({ recordedRequests: {} })
       logger('Mode not set', 'info')
     }
-
-    setBadgeText()
   })
 }
 
@@ -121,13 +119,15 @@ function setBadgeText() {
 }
 
 // ----------
-// Chrome storage
+// Chrome interactions
 // ----------
-// Run once initially
 getMode()
+setBadgeText()
 
 // Update on storage change
 chrome.storage.onChanged.addListener(function (changes) {
+  setBadgeText()
+
   for (let key in changes) {
     if (key === 'mode') {
       getMode()
