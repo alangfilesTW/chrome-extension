@@ -18,7 +18,10 @@ function contains(selector, text) {
 }
 
 function wrapRedacted() {
-  const redactedText = contains('h1, h2, h3, h4, h5, h6, p, div', '[REDACTED]')
+  const redactedText = contains(
+    'h1, h2, h3, h4, h5, h6, p, div, span',
+    '[REDACTED]',
+  )
   redactedText.forEach(function (element) {
     if ((element.getAttribute('data-id') || '').includes('redacted')) return
     element.setAttribute('data-id', 'redacted')
