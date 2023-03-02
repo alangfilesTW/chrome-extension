@@ -32,6 +32,10 @@ function setRecordings(recordings) {
   recordingsList.innerHTML = ''
 
   if (recordings.length > 0) {
+    recordings = recordings.sort((a, b) => {
+      return b.date.seconds - a.date.seconds
+    })
+
     const disabledOption = document.createElement('option')
     disabledOption.innerHTML = 'Select a recording'
     disabledOption.disabled = true
@@ -41,9 +45,9 @@ function setRecordings(recordings) {
 
     recordings.forEach((recording) => {
       const option = document.createElement('option')
-      option.innerHTML = `${recording.title} - ${toDateTime(
-        recording.date?.seconds,
-      )}`
+      option.innerHTML = `${
+        recording.url.split('.com/')[1].split('/')[0].split('?')[0]
+      } - ${toDateTime(recording.date?.seconds).toString().split(' GMT')[0]}`
       option.value = JSON.stringify(recording)
       recordingsList.appendChild(option)
     })
@@ -52,17 +56,32 @@ function setRecordings(recordings) {
 
 function sanitizeRequests(requests) {
   let req = requests
-  let keys = ['firstName', 'lastName', 'email', 'createdBy', 'updatedBy']
+  let keys = [
+    'name',
+    'firstName',
+    'lastName',
+    'email',
+    'createdBy',
+    'updatedBy',
+    'first_name',
+    'last_name',
+    'address1',
+    'address2',
+  ]
 
   Object.keys(req).forEach((key) => {
     keys.forEach((k) => {
       try {
-        if (!k.includes('pnl') && req[key].includes(k)) {
+        if (req[key].includes(k)) {
           const re = new RegExp(`"${k}":\s*"[^"]+?([^\/"]+)"`, 'g')
           req[key] = req[key].replaceAll(re, `"${k}":"[REDACTED]"`)
 
-          const re2 = new RegExp(`\"${k}\":\s*\"[^"]+?([^\/"]+)\"`, 'g')
-          req[key] = req[key].replaceAll(re2, `"${k}":"[REDACTED]"`)
+          // conditional to sift escaped quotes
+          // only if they are "pre-esacped"
+          if (req[key].includes('/"')) {
+            const re2 = new RegExp(`\"${k}\":\s*\"[^"]+?([^\/"]+)\"`, 'g')
+            req[key] = req[key].replaceAll(re2, `\"${k}\":\"[REDACTED]\"`)
+          }
         }
       } catch {}
     })
@@ -118,8 +137,10 @@ chrome.storage.local.get('mode', function (items) {
 
   if (mode === 'record') {
     document.getElementById('record').classList.add('active')
+    document.getElementById('sanitize').style.display = 'none'
   } else if (mode === 'playback') {
     document.getElementById('playback').classList.add('active')
+    document.getElementById('sanitize').style.display = 'inline'
   }
 })
 
@@ -157,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
     chrome.storage.local.set({ mode: 'record' })
     document.getElementById('record').classList.add('active')
     document.getElementById('playback').classList.remove('active')
+    document.getElementById('sanitize').style.display = 'none'
     setSizes()
   })
 
@@ -164,13 +186,27 @@ document.addEventListener('DOMContentLoaded', function () {
     chrome.storage.local.set({ mode: 'playback' })
     document.getElementById('playback').classList.add('active')
     document.getElementById('record').classList.remove('active')
+    document.getElementById('sanitize').style.display = 'inline'
     setSizes()
+  })
+
+  document.getElementById('sanitize').addEventListener('click', function () {
+    chrome.storage.local.get('recordedRequests', function (items) {
+      const sanitizedRequests = sanitizeRequests(items.recordedRequests)
+      chrome.storage.local.set({ recordedRequests: sanitizedRequests })
+
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.reload(tabs[0].id)
+        chrome.runtime.reload()
+      })
+    })
   })
 
   document.getElementById('reset').addEventListener('click', function () {
     chrome.storage.local.clear()
     document.getElementById('playback').classList.remove('active')
     document.getElementById('record').classList.remove('active')
+    document.getElementById('sanitize').style.display = 'none'
     setSizes()
   })
 
@@ -231,6 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       chrome.tabs.update(tabs[0].id, { url: data.url }, function () {
+        chrome.runtime.reload()
         window.close()
       })
     })

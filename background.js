@@ -48,7 +48,6 @@ function getMode() {
 
     if (mode === 'record') {
       logger('Record mode', 'info')
-      chrome.storage.local.set({ recordedRequests: {} })
       chrome.browserAction.setBadgeBackgroundColor({ color: '#c63e25' })
       chrome.webRequest.onBeforeRequest.addListener(
         bodyRecordingFunction,
@@ -72,6 +71,7 @@ function getMode() {
         )
       })
     } else {
+      chrome.storage.local.set({ recordedRequests: {} })
       logger('Mode not set', 'info')
     }
   })
@@ -84,7 +84,12 @@ function generateKey(details) {
 function isGoodRequest(url, method) {
   if (!url || url.includes('chrome')) return false
   if (method && method === 'OPTIONS') return false
-  if (url.includes('api.triplewhale.com')) return true
+  if (
+    url.includes('triplewhale.com') ||
+    url.includes('shopify') ||
+    url.includes('facebook')
+  )
+    return true
   return false
 }
 
