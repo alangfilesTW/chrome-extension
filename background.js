@@ -82,7 +82,7 @@ function generateKey(details) {
 }
 
 function isGoodRequest(url, method) {
-  if (!url || url.includes('chrome')) return false
+  if (!url || url.includes('chrome') || url.includes('lotties')) return false
   if (method && method === 'OPTIONS') return false
   if (
     url.includes('triplewhale.com') ||
