@@ -62,7 +62,7 @@ function setRecordings(recordings) {
 function sanitizeRequests(requests) {
   let req = requests
   let keys = [
-    // 'name',
+    'name',
     'firstName',
     'lastName',
     'email',

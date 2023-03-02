@@ -23,13 +23,30 @@ function contains(selector, text) {
 }
 
 function wrapRedacted() {
+  // try to find shop name
+  try {
+    const shopImage = document.querySelector('img[alt="shop logo"]')
+    if (shopImage && shopName === '') {
+      shopName = shopImage.src
+        .split('shop-icon/')[1]
+        .split('.myshopify')[0]
+        .replace(/-/g, '')
+    }
+  } catch {}
+
   ;['[REDACTED]', '[REDACTED] [REDACTED]', shopName].forEach(function (text) {
     const redactedText = contains(
-      'h1, h2, h3, h4, h5, h6, p, div, span, button',
+      'h1, h2, h3, h4, h5, h6, p, div, span, button, a',
       text,
     )
     redactedText.forEach(function (element) {
-      if ((element.getAttribute('data-id') || '').includes('redacted')) return
+      if (
+        (element.getAttribute('data-id') || '').includes('redacted') ||
+        text === '' ||
+        !element.innerText.includes(text)
+      )
+        return
+
       element.setAttribute('data-id', 'redacted')
     })
   })
@@ -46,14 +63,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   `
   document.head.appendChild(styleSheet)
-
-  // try to find shop name
-  try {
-    const shopImage = document.querySelector('img[alt="shop logo"]')
-    if (shopImage) {
-      shopName = shopImage.src.split('shop-icon/')[1].split('.myshopify')[0]
-    }
-  } catch {}
 })
 
 const config = { attributes: true, childList: true, subtree: true }
