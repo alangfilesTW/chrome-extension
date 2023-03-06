@@ -44,9 +44,16 @@ function setRecordings(recordings) {
 
     recordings.forEach((recording) => {
       const option = document.createElement('option')
+      const view = recording.url.split('.com/')[1].split('/')[0].split('?')[0]
+      const store =
+        recording.url
+          .split('shop-id=')[1]
+          ?.split('&')[0]
+          .replace('.myshopify.com', '') ?? ''
+
       option.innerHTML = `${
-        recording.url.split('.com/')[1].split('/')[0].split('?')[0]
-      } - ${recording.date.toDate().toLocaleString('en-US')}`
+        store.length > 0 ? `${store} - ` : ''
+      }${view} - ${recording.date.toDate().toLocaleString('en-US')}`
       option.value = JSON.stringify(recording)
       recordingsList.appendChild(option)
     })
