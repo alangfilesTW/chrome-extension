@@ -34,6 +34,13 @@ function convertHeadersArrayToObject(array) {
   return newObj
 }
 
+function hashCode(s) {
+  return s.split('').reduce(function (a, b) {
+    a = (a << 5) - a + b.charCodeAt(0)
+    return a & a
+  }, 0)
+}
+
 let recordedRequests = {}
 function getMode() {
   chrome.storage.local.get('mode', function (items) {
@@ -67,7 +74,7 @@ function getMode() {
         chrome.webRequest.onBeforeRequest.addListener(
           playbackFunction,
           { types: ['xmlhttprequest'], urls: ['<all_urls>'] },
-          ['blocking'],
+          ['blocking', 'extraHeaders', 'requestBody'],
         )
       })
     } else {
@@ -77,8 +84,51 @@ function getMode() {
   })
 }
 
-function generateKey(details) {
-  return `${details.method}:${details.url}`
+function generateKey(details, includeBody) {
+  const formattedURL = details.url.split('?')[0]
+
+  if (includeBody) {
+    if (
+      details.requestBody &&
+      details.requestBody.raw &&
+      details.requestBody.raw[0] &&
+      details.requestBody.raw[0].bytes
+    ) {
+      try {
+        return `${details.method}:${formattedURL}:${hashCode(
+          JSON.parse(
+            decodeURIComponent(
+              String.fromCharCode.apply(
+                null,
+                new Uint8Array(details.requestBody.raw[0].bytes),
+              ),
+            ),
+          ),
+        )}`
+      } catch {}
+
+      try {
+        return `${details.method}:${formattedURL}:${hashCode(
+          JSON.stringify(
+            decodeURIComponent(
+              String.fromCharCode.apply(
+                null,
+                new Uint8Array(details.requestBody.raw[0].bytes),
+              ),
+            ),
+          ),
+        )}`
+      } catch {}
+    }
+
+    if (typeof includeBody === 'string') {
+      return `${details.method}:${formattedURL}:${hashCode(
+        JSON.stringify(includeBody),
+      )}`
+    }
+  }
+
+  return `${details.method}:${formattedURL}`
 }
 
 function isGoodRequest(url, method) {
@@ -208,7 +258,7 @@ const recordingFunction = function (details) {
             const recordedRequests = items.recordedRequests || {}
 
             if (res && !res.error) {
-              recordedRequests[key] = res
+              recordedRequests[generateKey(details, params.body)] = res
               chrome.storage.local.set({ recordedRequests: recordedRequests })
               logger(
                 `${details.method} request recorded: ${details.url}`,
@@ -232,12 +282,12 @@ const playbackFunction = function (req) {
   if (!isGoodRequest(req.url, req.method)) return
   if (Object.keys(recordedRequests).length === 0) return
 
-  const key = generateKey(req)
+  const key = generateKey(req, true)
   if (!key) return
 
-  const recordedResponse = recordedRequests[generateKey(req)]
-  if (recordedResponse && !recordedResponse.message) {
-    logger(`${req.method} request intercepted: ${req.url}`, 'success')
+  const recordedResponse = recordedRequests[key]
+  if (recordedResponse && !recordedResponse.indexOf('message') > -1) {
+    logger(`${req.method} request intercepted: ${key}`, 'success')
 
     return {
       redirectUrl:
