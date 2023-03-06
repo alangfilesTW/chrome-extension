@@ -2,6 +2,7 @@
 // Constants
 // ----------
 let shopName = ''
+let fallbackShopName = ''
 
 // ----------
 // Helpers
@@ -23,33 +24,46 @@ function contains(selector, text) {
 }
 
 function wrapRedacted() {
+  const shopImage = document.querySelector('img[alt="shop logo"]')
+
   // try to find shop name
   try {
-    const shopImage = document.querySelector('img[alt="shop logo"]')
     if (shopImage && shopName === '') {
-      shopName = shopImage.src
-        .split('shop-icon/')[1]
-        .split('.myshopify')[0]
-        .replace(/-/g, '')
+      shopName = shopImage.src.split('shop-icon/')[1].split('.myshopify')[0]
     }
   } catch {}
 
-  ;['[REDACTED]', '[REDACTED] [REDACTED]', shopName].forEach(function (text) {
-    const redactedText = contains(
-      'h1, h2, h3, h4, h5, h6, p, div, span, button, a, text',
-      text,
-    )
-    redactedText.forEach(function (element) {
-      if (
-        (element.getAttribute('data-id') || '').includes('redacted') ||
-        text === '' ||
-        !element.innerText.includes(text)
-      )
-        return
+  // more sleazy way, but more reliable actually
+  try {
+    const shopImage = document.querySelector('img[alt="shop logo"]')
+    if (shopImage && fallbackShopName === '') {
+      fallbackShopName =
+        // YIKES!!
+        shopImage.parentElement.parentElement.parentElement.parentElement.querySelector(
+          '.text-white',
+        ).innerHTML
+    }
+  } catch {}
 
-      element.setAttribute('data-id', 'redacted')
-    })
-  })
+  ;['[REDACTED]', '[REDACTED] [REDACTED]', shopName, fallbackShopName].forEach(
+    function (text) {
+      const redactedText = contains(
+        'h1, h2, h3, h4, h5, h6, p, div, span, button, a, text',
+        text,
+        text.replace(/-/g, ''),
+      )
+      redactedText.forEach(function (element) {
+        if (
+          (element.getAttribute('data-id') || '').includes('redacted') ||
+          text === '' ||
+          !element.innerText.includes(text)
+        )
+          return
+
+        element.setAttribute('data-id', 'redacted')
+      })
+    },
+  )
 }
 
 // ----------
