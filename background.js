@@ -287,7 +287,7 @@ const playbackFunction = function (req) {
 
   const recordedResponse = recordedRequests[key]
   if (recordedResponse && !recordedResponse.indexOf('message') > -1) {
-    logger(`${req.method} request intercepted: ${key}`, 'success')
+    logger(`${req.method} request intercepted: ${req.url}`, 'success')
 
     return {
       redirectUrl:
