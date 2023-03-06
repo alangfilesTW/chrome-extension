@@ -56,7 +56,10 @@ function setRecordings(recordings) {
 function sanitizeRequests(requests) {
   let req = requests
   let keys = [
-    'name',
+    //@TODO
+    // - this is a common key
+    // - need to check other conditions before redacting
+    // 'name',
     'firstName',
     'lastName',
     'email',
