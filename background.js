@@ -229,9 +229,10 @@ const recordingFunction = function (details) {
   if (isGoodRequest(url, method)) {
     const key = generateKey(details)
     let token = getToken(details.requestHeaders)
+    const cacheKey = `${generateKey(details)}${details.requestHeaders}`
 
-    if (!cachedEndpointRequests.includes(key)) {
-      cachedEndpointRequests.push(key)
+    if (!cachedEndpointRequests.includes(cacheKey)) {
+      cachedEndpointRequests.push(cacheKey)
 
       var params = {
         method: method,
