@@ -15,8 +15,15 @@ function formatBytes(bytes, decimals = 2) {
 
 function setSizes() {
   chrome.storage.local.get('recordedRequests', function (items) {
+    const size = JSON.stringify(items.recordedRequests || '').length
+    if (size > 1000000) {
+      document.getElementById('save').disabled = true
+    } else {
+      document.getElementById('save').disabled = false
+    }
+
     document.getElementById('size').innerHTML = `&nbsp;&nbsp;${formatBytes(
-      JSON.stringify(items.recordedRequests || '').length,
+      size,
     )} in-cache`
 
     const keysSize = Object.keys(items.recordedRequests || {}).length
