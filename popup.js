@@ -58,9 +58,11 @@ function setRecordings(recordings) {
           ?.split('&')[0]
           .replace('.myshopify.com', '') ?? ''
 
-      option.innerHTML = `${
+      const generatedTitle = `${
         store.length > 0 ? `${store} - ` : ''
       }${view} - ${recording.date.toDate().toLocaleString('en-US')}`
+
+      option.innerHTML = recording.name || recording.generatedTitle
       option.value = JSON.stringify(recording)
       recordingsList.appendChild(option)
     })
@@ -231,8 +233,11 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('save').addEventListener('click', function (e) {
     e.target.disabled = true
 
+    let name = document.getElementById('name').value
+
     chrome.storage.local.get('recordedRequests', function (items) {
       const sanitizedRequests = sanitizeRequests(items.recordedRequests)
+      console.log(sanitizedRequests)
       chrome.storage.local.set({ recordedRequests: sanitizedRequests })
       chrome.tabs.getSelected(null, function (tab) {
         if (db && items.recordedRequests) {
@@ -246,6 +251,7 @@ document.addEventListener('DOMContentLoaded', function () {
               date: new Date(),
               title: tab.title,
               url: tab.url,
+              name: name,
               requests: sanitizedRequests,
             })
             .then(function (docRef) {

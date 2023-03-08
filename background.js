@@ -229,7 +229,7 @@ const recordingFunction = function (details) {
   if (isGoodRequest(url, method)) {
     const key = generateKey(details)
     let token = getToken(details.requestHeaders)
-    const cacheKey = `${generateKey(details)}${details.requestHeaders}`
+    const cacheKey = `${key}${details.requestHeaders}`
 
     if (!cachedEndpointRequests.includes(cacheKey)) {
       cachedEndpointRequests.push(cacheKey)
@@ -259,12 +259,10 @@ const recordingFunction = function (details) {
             const recordedRequests = items.recordedRequests || {}
 
             if (res && !res.error) {
-              recordedRequests[generateKey(details, params.body)] = res
+              const key = generateKey(details, params.body)
+              recordedRequests[key] = res
               chrome.storage.local.set({ recordedRequests: recordedRequests })
-              logger(
-                `${details.method} request recorded: ${details.url}`,
-                'warning',
-              )
+              logger(`${details.method} request recorded: ${key}`, 'warning')
             } else {
               cachedEndpointRequests = cachedEndpointRequests.filter(
                 (item) => item !== key,
@@ -288,12 +286,14 @@ const playbackFunction = function (req) {
 
   const recordedResponse = recordedRequests[key]
   if (recordedResponse && !recordedResponse.indexOf('message') > -1) {
-    logger(`${req.method} request intercepted: ${req.url}`, 'success')
+    logger(`${req.method} request intercepted: ${key}`, 'success')
 
     return {
       redirectUrl:
         'data:text/html;charset=utf-8,' + encodeURIComponent(recordedResponse),
     }
+  } else {
+    logger(`No recorded response for ${key}`, 'error')
   }
 
   return
