@@ -62,7 +62,7 @@ function setRecordings(recordings) {
         store.length > 0 ? `${store} - ` : ''
       }${view} - ${recording.date.toDate().toLocaleString('en-US')}`
 
-      option.innerHTML = recording.name || recording.generatedTitle
+      option.innerHTML = recording.name || generatedTitle
       option.value = JSON.stringify(recording)
       recordingsList.appendChild(option)
     })
@@ -237,7 +237,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     chrome.storage.local.get('recordedRequests', function (items) {
       const sanitizedRequests = sanitizeRequests(items.recordedRequests)
-      console.log(sanitizedRequests)
       chrome.storage.local.set({ recordedRequests: sanitizedRequests })
       chrome.tabs.getSelected(null, function (tab) {
         if (db && items.recordedRequests) {
