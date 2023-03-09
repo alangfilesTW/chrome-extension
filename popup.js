@@ -255,10 +255,9 @@ document.addEventListener('DOMContentLoaded', function () {
               requests: {},
             })
             .then(function (docRef) {
-              Promise.all(
+              Promise.allSettled(
                 Object.keys(sanitizedRequests).map((key) => {
-                  console.log(key)
-                  new Promise((resolve, reject) => {
+                  return new Promise((resolve, reject) => {
                     db.collection('recordings')
                       .doc(docRef.id)
                       .set(
@@ -278,13 +277,13 @@ document.addEventListener('DOMContentLoaded', function () {
               )
                 .then(() => {
                   showSuccess()
+                  getRecordings(db)
+                  e.target.disabled = false
                 })
                 .catch(function (error) {
                   showError()
-                  console.error('Error adding requests to document: ', error)
-                })
-                .finally(() => {
                   e.target.disabled = false
+                  console.error('Error adding requests to document: ', error)
                 })
             })
             .catch(function (error) {
