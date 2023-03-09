@@ -16,7 +16,7 @@ function formatBytes(bytes, decimals = 2) {
 function setSizes() {
   chrome.storage.local.get('recordedRequests', function (items) {
     const size = JSON.stringify(items.recordedRequests || '').length
-    if (size > 1000000 || size <= 2) {
+    if (size <= 2) {
       document.getElementById('save').disabled = true
     } else {
       document.getElementById('save').disabled = false
