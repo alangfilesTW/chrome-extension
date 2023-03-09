@@ -57,10 +57,16 @@ function setRecordings(recordings) {
           .replace('.myshopify.com', '') ?? ''
 
       const generatedTitle = `${
-        store.length > 0 ? `${store} - ` : ''
-      }${view} - ${recording.date.toDate().toLocaleString('en-US')}`
+        recording.name?.length > 0
+          ? `${recording.name} - `
+          : store.length > 0
+          ? `${store} - `
+          : ''
+      }${recording.name?.length > 0 ? '' : `${view} - `}${recording.date
+        .toDate()
+        .toLocaleString('en-US')}`
 
-      option.innerHTML = recording.name || generatedTitle
+      option.innerHTML = generatedTitle
       option.value = JSON.stringify(recording)
       recordingsList.appendChild(option)
     })
@@ -240,29 +246,50 @@ document.addEventListener('DOMContentLoaded', function () {
       chrome.storage.local.set({ recordedRequests: sanitizedRequests })
       chrome.tabs.getSelected(null, function (tab) {
         if (db && items.recordedRequests) {
-          // @TODO - Improvement
-          // use cloud storage for this file
-          // if greater than 1mb
-          // then reference it below
-          // https://firebase.google.com/docs/storage/web/upload-files
           db.collection('recordings')
             .add({
               date: new Date(),
               title: tab.title,
               url: tab.url,
               name: name,
-              requests: sanitizedRequests,
+              requests: {},
             })
             .then(function (docRef) {
-              showSuccess()
-              console.log('Document written with ID: ', docRef.id)
-              getRecordings(db)
+              Promise.all(
+                Object.keys(sanitizedRequests).map((key) => {
+                  console.log(key)
+                  new Promise((resolve, reject) => {
+                    db.collection('recordings')
+                      .doc(docRef.id)
+                      .set(
+                        {
+                          requests: {
+                            [key]: sanitizedRequests[key],
+                          },
+                        },
+                        { merge: true },
+                      )
+                      .then(() => {
+                        resolve(key)
+                      })
+                      .catch(() => reject())
+                  })
+                }),
+              )
+                .then(() => {
+                  showSuccess()
+                })
+                .catch(function (error) {
+                  showError()
+                  console.error('Error adding requests to document: ', error)
+                })
+                .finally(() => {
+                  e.target.disabled = false
+                })
             })
             .catch(function (error) {
               showError()
               console.error('Error adding document: ', error)
-            })
-            .finally(() => {
               e.target.disabled = false
             })
         } else {
