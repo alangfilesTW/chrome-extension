@@ -16,7 +16,7 @@ function formatBytes(bytes, decimals = 2) {
 function setSizes() {
   chrome.storage.local.get('recordedRequests', function (items) {
     const size = JSON.stringify(items.recordedRequests || '').length
-    if (size <= 2) {
+    if (size > 1000000 || size <= 2) {
       document.getElementById('save').disabled = true
     } else {
       document.getElementById('save').disabled = false
@@ -246,49 +246,29 @@ document.addEventListener('DOMContentLoaded', function () {
       chrome.storage.local.set({ recordedRequests: sanitizedRequests })
       chrome.tabs.getSelected(null, function (tab) {
         if (db && items.recordedRequests) {
+          // @TODO - Improvement
+          // use cloud storage for this file
+          // if greater than 1mb
+          // then reference it below
+          // https://firebase.google.com/docs/storage/web/upload-files
           db.collection('recordings')
             .add({
               date: new Date(),
               title: tab.title,
               url: tab.url,
               name: name,
-              requests: {},
+              requests: sanitizedRequests,
             })
             .then(function (docRef) {
-              Promise.allSettled(
-                Object.keys(sanitizedRequests).map((key) => {
-                  return new Promise((resolve, reject) => {
-                    db.collection('recordings')
-                      .doc(docRef.id)
-                      .set(
-                        {
-                          requests: {
-                            [key]: sanitizedRequests[key],
-                          },
-                        },
-                        { merge: true },
-                      )
-                      .then(() => {
-                        resolve(key)
-                      })
-                      .catch(() => reject())
-                  })
-                }),
-              )
-                .then(() => {
-                  showSuccess()
-                  getRecordings(db)
-                  e.target.disabled = false
-                })
-                .catch(function (error) {
-                  showError()
-                  e.target.disabled = false
-                  console.error('Error adding requests to document: ', error)
-                })
+              showSuccess()
+              console.log('Document written with ID: ', docRef.id)
+              getRecordings(db)
             })
             .catch(function (error) {
               showError()
               console.error('Error adding document: ', error)
+            })
+            .finally(() => {
               e.target.disabled = false
             })
         } else {
