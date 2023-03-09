@@ -264,8 +264,18 @@ const recordingFunction = function (details) {
               chrome.storage.local.set({ recordedRequests: recordedRequests })
               logger(`${details.method} request recorded: ${key}`, 'warning')
             } else {
+              logger(
+                `${details.method} request could not be recorded: ${key}`,
+                'error',
+              )
+            }
+
+            if (method === 'POST' || !res || res.error) {
+              // As well as on failure,
+              // always remove POST requests from cache
+              // to allow for new POSTS requests with different bodies to be recorded
               cachedEndpointRequests = cachedEndpointRequests.filter(
-                (item) => item !== key,
+                (item) => item !== cacheKey,
               )
             }
           })
