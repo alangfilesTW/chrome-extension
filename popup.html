@@ -13,16 +13,17 @@
     <button id="sanitize" style="display: none">Sanitize</button>
     <button id="reset">Reset</button>
     <div id="firebase-interactions">
-      <br /><br />
-
-      <label>Name:</label>
-      <input id="name" />
-      <button id="save">Save to Firebase</button>
-      <span style="display: none" id="success">&nbsp;&nbsp;&#x2705;</span>
-      <span style="display: none" id="error">&nbsp;&nbsp;&#x274C;</span>
+      <br />
       <span id="size"></span>
       <br /><br />
-      <div class="load-recordings">
+      <div class="form-row">
+        <input id="name" placeholder="File Name" />
+        <button id="save" disabled>Save to Firebase</button>
+        <span style="display: none" id="success">&nbsp;&nbsp;&#x2705;</span>
+        <span style="display: none" id="error">&nbsp;&nbsp;&#x274C;</span>
+      </div>
+      <br />
+      <div class="form-row">
         <select id="recordings">
           <option value="" disabled selected>Select a recording</option>
         </select>

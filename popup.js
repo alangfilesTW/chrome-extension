@@ -16,15 +16,13 @@ function formatBytes(bytes, decimals = 2) {
 function setSizes() {
   chrome.storage.local.get('recordedRequests', function (items) {
     const size = JSON.stringify(items.recordedRequests || '').length
-    if (size > 1000000) {
+    if (size > 1000000 || size <= 2) {
       document.getElementById('save').disabled = true
     } else {
       document.getElementById('save').disabled = false
     }
 
-    document.getElementById('size').innerHTML = `&nbsp;&nbsp;${formatBytes(
-      size,
-    )} in-cache`
+    document.getElementById('size').innerHTML = `${formatBytes(size)} in-cache`
 
     const keysSize = Object.keys(items.recordedRequests || {}).length
     chrome.browserAction.setBadgeText({
@@ -133,6 +131,7 @@ function showSuccess() {
   const success = document.getElementById('success')
   success.style.display = 'inline'
   setTimeout(() => {
+    document.getElementById('name').value = ''
     success.style.display = 'none'
   }, 3000)
 }
@@ -227,6 +226,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('playback').classList.remove('active')
     document.getElementById('record').classList.remove('active')
     document.getElementById('sanitize').style.display = 'none'
+    document.getElementById('save').value = ''
     setSizes()
   })
 
