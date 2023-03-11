@@ -51,17 +51,10 @@ function setRecordings(recordings) {
       const option = document.createElement('option')
       const view = recording.url.split('.com/')[1].split('/')[0].split('?')[0]
       const store =
-        recording.url
-          .split('shop-id=')[1]
-          ?.split('&')[0]
-          .replace('.myshopify.com', '') ?? ''
+        recording.url.split('shop-id=')[1]?.split('&')[0].replace('.myshopify.com', '') ?? ''
 
       const generatedTitle = `${
-        recording.name?.length > 0
-          ? `${recording.name} - `
-          : store.length > 0
-          ? `${store} - `
-          : ''
+        recording.name?.length > 0 ? `${recording.name} - ` : store.length > 0 ? `${store} - ` : ''
       }${recording.name?.length > 0 ? '' : `${view} - `}${recording.date
         .toDate()
         .toLocaleString('en-US')}`
@@ -278,11 +271,9 @@ document.addEventListener('DOMContentLoaded', function () {
     })
   })
 
-  document
-    .getElementById('recordings')
-    .addEventListener('change', function (e) {
-      document.getElementById('load').disabled = false
-    })
+  document.getElementById('recordings').addEventListener('change', function (e) {
+    document.getElementById('load').disabled = false
+  })
 
   document.getElementById('load').addEventListener('click', function (e) {
     e.target.disabled = true

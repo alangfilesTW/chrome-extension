@@ -14,9 +14,7 @@ function contains(selector, text) {
     return RegExp(text).test(
       Array.from(element.childNodes)
         .map(function (e) {
-          return e.nodeType === 3 && e.textContent.trim().includes(text)
-            ? e.textContent.trim()
-            : ''
+          return e.nodeType === 3 && e.textContent.trim().includes(text) ? e.textContent.trim() : ''
         })
         .join(''),
     )
@@ -45,25 +43,23 @@ function wrapRedacted() {
     }
   } catch {}
 
-  ;['[REDACTED]', '[REDACTED] [REDACTED]', shopName, fallbackShopName].forEach(
-    function (text) {
-      const redactedText = contains(
-        'h1, h2, h3, h4, h5, h6, p, div, span, button, a, text',
-        text,
-        text.replace(/-/g, ''),
+  ;['[REDACTED]', '[REDACTED] [REDACTED]', shopName, fallbackShopName].forEach(function (text) {
+    const redactedText = contains(
+      'h1, h2, h3, h4, h5, h6, p, div, span, button, a, text',
+      text,
+      text.replace(/-/g, ''),
+    )
+    redactedText.forEach(function (element) {
+      if (
+        (element.getAttribute('data-id') || '').includes('redacted') ||
+        text === '' ||
+        !element.innerText.includes(text)
       )
-      redactedText.forEach(function (element) {
-        if (
-          (element.getAttribute('data-id') || '').includes('redacted') ||
-          text === '' ||
-          !element.innerText.includes(text)
-        )
-          return
+        return
 
-        element.setAttribute('data-id', 'redacted')
-      })
-    },
-  )
+      element.setAttribute('data-id', 'redacted')
+    })
+  })
 }
 
 // ----------

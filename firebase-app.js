@@ -3,9 +3,7 @@
     ? (module.exports = t())
     : 'function' == typeof define && define.amd
     ? define(t)
-    : ((e =
-        'undefined' != typeof globalThis ? globalThis : e || self).firebase =
-        t())
+    : ((e = 'undefined' != typeof globalThis ? globalThis : e || self).firebase = t())
 })(this, function () {
   'use strict'
   var r = function (e, t) {
@@ -16,8 +14,7 @@
           e.__proto__ = t
         }) ||
       function (e, t) {
-        for (var n in t)
-          Object.prototype.hasOwnProperty.call(t, n) && (e[n] = t[n])
+        for (var n in t) Object.prototype.hasOwnProperty.call(t, n) && (e[n] = t[n])
       })(e, t)
   }
   var n = function () {
@@ -161,9 +158,7 @@
           }
         },
       }
-    throw new TypeError(
-      t ? 'Object is not iterable.' : 'Symbol.iterator is not defined.',
-    )
+    throw new TypeError(t ? 'Object is not iterable.' : 'Symbol.iterator is not defined.')
   }
   function f(e, t) {
     var n = 'function' == typeof Symbol && e[Symbol.iterator]
@@ -173,8 +168,7 @@
       o = n.call(e),
       a = []
     try {
-      for (; (void 0 === t || 0 < t--) && !(r = o.next()).done; )
-        a.push(r.value)
+      for (; (void 0 === t || 0 < t--) && !(r = o.next()).done; ) a.push(r.value)
     } catch (e) {
       i = { error: e }
     } finally {
@@ -204,8 +198,7 @@
       default:
         return t
     }
-    for (var n in t)
-      t.hasOwnProperty(n) && '__proto__' !== n && (e[n] = h(e[n], t[n]))
+    for (var n in t) t.hasOwnProperty(n) && '__proto__' !== n && (e[n] = h(e[n], t[n]))
     return e
   }
   var o =
@@ -231,19 +224,12 @@
     c =
       ((function (e, t) {
         if ('function' != typeof t && null !== t)
-          throw new TypeError(
-            'Class extends value ' +
-              String(t) +
-              ' is not a constructor or null',
-          )
+          throw new TypeError('Class extends value ' + String(t) + ' is not a constructor or null')
         function n() {
           this.constructor = e
         }
         r(e, t),
-          (e.prototype =
-            null === t
-              ? Object.create(t)
-              : ((n.prototype = t.prototype), new n()))
+          (e.prototype = null === t ? Object.create(t) : ((n.prototype = t.prototype), new n()))
       })(u, (s = Error)),
       u)
   function u(e, t, n) {
@@ -307,8 +293,7 @@
     (I.prototype.subscribe = function (e, t, n) {
       var r,
         i = this
-      if (void 0 === e && void 0 === t && void 0 === n)
-        throw new Error('Missing Observer.')
+      if (void 0 === e && void 0 === t && void 0 === n) throw new Error('Missing Observer.')
       void 0 ===
         (r = (function (e, t) {
           if ('object' != typeof e || null === e) return !1
@@ -339,13 +324,10 @@
         void 0 !== this.observers[e] &&
         (delete this.observers[e],
         --this.observerCount,
-        0 === this.observerCount &&
-          void 0 !== this.onNoObservers &&
-          this.onNoObservers(this))
+        0 === this.observerCount && void 0 !== this.onNoObservers && this.onNoObservers(this))
     }),
     (I.prototype.forEachObserver = function (e) {
-      if (!this.finalized)
-        for (var t = 0; t < this.observers.length; t++) this.sendOne(t, e)
+      if (!this.finalized) for (var t = 0; t < this.observers.length; t++) this.sendOne(t, e)
     }),
     (I.prototype.sendOne = function (e, t) {
       var n = this
@@ -415,8 +397,7 @@
         if (!this.instancesDeferred.has(t)) {
           e = new o()
           if (
-            (this.instancesDeferred.set(t, e),
-            this.isInitialized(t) || this.shouldAutoInitialize())
+            (this.instancesDeferred.set(t, e), this.isInitialized(t) || this.shouldAutoInitialize())
           )
             try {
               var n = this.getOrInitializeService({ instanceIdentifier: t })
@@ -426,11 +407,8 @@
         return this.instancesDeferred.get(t).promise
       }),
       (C.prototype.getImmediate = function (t) {
-        var e = this.normalizeInstanceIdentifier(
-            null == t ? void 0 : t.identifier,
-          ),
-          t =
-            null !== (t = null == t ? void 0 : t.optional) && void 0 !== t && t
+        var e = this.normalizeInstanceIdentifier(null == t ? void 0 : t.identifier),
+          t = null !== (t = null == t ? void 0 : t.optional) && void 0 !== t && t
         if (!this.isInitialized(e) && !this.shouldAutoInitialize()) {
           if (t) return null
           throw Error('Service ' + this.name + ' is not available')
@@ -448,28 +426,15 @@
       (C.prototype.setComponent = function (e) {
         var t, n
         if (e.name !== this.name)
-          throw Error(
-            'Mismatching Component ' +
-              e.name +
-              ' for Provider ' +
-              this.name +
-              '.',
-          )
-        if (this.component)
-          throw Error(
-            'Component for ' + this.name + ' has already been provided',
-          )
+          throw Error('Mismatching Component ' + e.name + ' for Provider ' + this.name + '.')
+        if (this.component) throw Error('Component for ' + this.name + ' has already been provided')
         if (((this.component = e), this.shouldAutoInitialize())) {
           if ('EAGER' === e.instantiationMode)
             try {
               this.getOrInitializeService({ instanceIdentifier: _ })
             } catch (e) {}
           try {
-            for (
-              var r = p(this.instancesDeferred.entries()), i = r.next();
-              !i.done;
-              i = r.next()
-            ) {
+            for (var r = p(this.instancesDeferred.entries()), i = r.next(); !i.done; i = r.next()) {
               var o = f(i.value, 2),
                 a = o[0],
                 s = o[1],
@@ -562,11 +527,7 @@
           options: r,
         })
         try {
-          for (
-            var a = p(this.instancesDeferred.entries()), s = a.next();
-            !s.done;
-            s = a.next()
-          ) {
+          for (var a = p(this.instancesDeferred.entries()), s = a.next(); !s.done; s = a.next()) {
             var l = f(s.value, 2),
               c = l[0],
               u = l[1]
@@ -585,10 +546,7 @@
       }),
       (C.prototype.onInit = function (e, t) {
         var n = this.normalizeInstanceIdentifier(t),
-          r =
-            null !== (t = this.onInitCallbacks.get(n)) && void 0 !== t
-              ? t
-              : new Set()
+          r = null !== (t = this.onInitCallbacks.get(n)) && void 0 !== t ? t : new Set()
         r.add(e), this.onInitCallbacks.set(n, r)
         t = this.instances.get(n)
         return (
@@ -643,15 +601,10 @@
         return e || null
       }),
       (C.prototype.normalizeInstanceIdentifier = function (e) {
-        return (
-          void 0 === e && (e = _),
-          !this.component || this.component.multipleInstances ? e : _
-        )
+        return void 0 === e && (e = _), !this.component || this.component.multipleInstances ? e : _
       }),
       (C.prototype.shouldAutoInitialize = function () {
-        return (
-          !!this.component && 'EXPLICIT' !== this.component.instantiationMode
-        )
+        return !!this.component && 'EXPLICIT' !== this.component.instantiationMode
       }),
       C)
   function C(e, t) {
@@ -667,17 +620,11 @@
     ((L.prototype.addComponent = function (e) {
       var t = this.getProvider(e.name)
       if (t.isComponentSet())
-        throw new Error(
-          'Component ' +
-            e.name +
-            ' has already been registered with ' +
-            this.name,
-        )
+        throw new Error('Component ' + e.name + ' has already been registered with ' + this.name)
       t.setComponent(e)
     }),
     (L.prototype.addOrOverwriteComponent = function (e) {
-      this.getProvider(e.name).isComponentSet() &&
-        this.providers.delete(e.name),
+      this.getProvider(e.name).isComponentSet() && this.providers.delete(e.name),
         this.addComponent(e)
     }),
     (L.prototype.getProvider = function (e) {
@@ -706,11 +653,7 @@
       var i = new Date().toISOString(),
         o = j[t]
       if (!o)
-        throw new Error(
-          'Attempted to log a message with an invalid logType (value: ' +
-            t +
-            ')',
-        )
+        throw new Error('Attempted to log a message with an invalid logType (value: ' + t + ')')
       console[o].apply(console, a(['[' + i + ']  ' + e.name + ':'], n))
     }
   }
@@ -736,10 +679,7 @@
           return this._logLevel
         },
         set: function (e) {
-          if (!(e in R))
-            throw new TypeError(
-              'Invalid value "' + e + '" assigned to `logLevel`',
-            )
+          if (!(e in R)) throw new TypeError('Invalid value "' + e + '" assigned to `logLevel`')
           this._logLevel = e
         },
         enumerable: !1,
@@ -754,9 +694,7 @@
         },
         set: function (e) {
           if ('function' != typeof e)
-            throw new TypeError(
-              'Value assigned to `logHandler` must be a function',
-            )
+            throw new TypeError('Value assigned to `logHandler` must be a function')
           this._logHandler = e
         },
         enumerable: !1,
@@ -774,32 +712,27 @@
       }),
       (F.prototype.debug = function () {
         for (var e = [], t = 0; t < arguments.length; t++) e[t] = arguments[t]
-        this._userLogHandler &&
-          this._userLogHandler.apply(this, a([this, R.DEBUG], e)),
+        this._userLogHandler && this._userLogHandler.apply(this, a([this, R.DEBUG], e)),
           this._logHandler.apply(this, a([this, R.DEBUG], e))
       }),
       (F.prototype.log = function () {
         for (var e = [], t = 0; t < arguments.length; t++) e[t] = arguments[t]
-        this._userLogHandler &&
-          this._userLogHandler.apply(this, a([this, R.VERBOSE], e)),
+        this._userLogHandler && this._userLogHandler.apply(this, a([this, R.VERBOSE], e)),
           this._logHandler.apply(this, a([this, R.VERBOSE], e))
       }),
       (F.prototype.info = function () {
         for (var e = [], t = 0; t < arguments.length; t++) e[t] = arguments[t]
-        this._userLogHandler &&
-          this._userLogHandler.apply(this, a([this, R.INFO], e)),
+        this._userLogHandler && this._userLogHandler.apply(this, a([this, R.INFO], e)),
           this._logHandler.apply(this, a([this, R.INFO], e))
       }),
       (F.prototype.warn = function () {
         for (var e = [], t = 0; t < arguments.length; t++) e[t] = arguments[t]
-        this._userLogHandler &&
-          this._userLogHandler.apply(this, a([this, R.WARN], e)),
+        this._userLogHandler && this._userLogHandler.apply(this, a([this, R.WARN], e)),
           this._logHandler.apply(this, a([this, R.WARN], e))
       }),
       (F.prototype.error = function () {
         for (var e = [], t = 0; t < arguments.length; t++) e[t] = arguments[t]
-        this._userLogHandler &&
-          this._userLogHandler.apply(this, a([this, R.ERROR], e)),
+        this._userLogHandler && this._userLogHandler.apply(this, a([this, R.ERROR], e)),
           this._logHandler.apply(this, a([this, R.ERROR], e))
       }),
       F)
@@ -824,14 +757,12 @@
             null === a
               ? null
               : function (e, t) {
-                  for (var n = [], r = 2; r < arguments.length; r++)
-                    n[r - 2] = arguments[r]
+                  for (var n = [], r = 2; r < arguments.length; r++) n[r - 2] = arguments[r]
                   var i = n
                     .map(function (e) {
                       if (null == e) return null
                       if ('string' == typeof e) return e
-                      if ('number' == typeof e || 'boolean' == typeof e)
-                        return e.toString()
+                      if ('number' == typeof e || 'boolean' == typeof e) return e.toString()
                       if (e instanceof Error) return e.message
                       try {
                         return JSON.stringify(e)
@@ -861,8 +792,7 @@
       (H['app-deleted'] = "Firebase App named '{$appName}' already deleted"),
       (H['invalid-app-argument'] =
         'firebase.{$appName}() takes either no argument or a Firebase App instance.'),
-      (H['invalid-log-argument'] =
-        'First argument to `onLog` must be null or a function.'),
+      (H['invalid-log-argument'] = 'First argument to `onLog` must be null or a function.'),
       H),
     V = new d('app', 'Firebase', H),
     B = '@firebase/app',
@@ -934,9 +864,7 @@
         return (
           n.isInitialized() ||
             'EXPLICIT' !==
-              (null === (e = n.getComponent()) || void 0 === e
-                ? void 0
-                : e.instantiationMode) ||
+              (null === (e = n.getComponent()) || void 0 === e ? void 0 : e.instantiationMode) ||
             n.initialize(),
           n.getImmediate({ identifier: t })
         )
@@ -948,13 +876,7 @@
         try {
           this.container.addComponent(t)
         } catch (e) {
-          W.debug(
-            'Component ' +
-              t.name +
-              ' failed to register with FirebaseApp ' +
-              this.name,
-            e,
-          )
+          W.debug('Component ' + t.name + ' failed to register with FirebaseApp ' + this.name, e)
         }
       }),
       ($.prototype._addOrOverwriteComponent = function (e) {
@@ -968,8 +890,7 @@
         }
       }),
       ($.prototype.checkDestroyed_ = function () {
-        if (this.isDeleted_)
-          throw V.create('app-deleted', { appName: this.name_ })
+        if (this.isDeleted_) throw V.create('app-deleted', { appName: this.name_ })
       }),
       $)
   function $(e, t, n) {
@@ -977,8 +898,7 @@
     ;(this.firebase_ = n),
       (this.isDeleted_ = !1),
       (this.name_ = t.name),
-      (this.automaticDataCollectionEnabled_ =
-        t.automaticDataCollectionEnabled || !1),
+      (this.automaticDataCollectionEnabled_ = t.automaticDataCollectionEnabled || !1),
       (this.options_ = h(void 0, e)),
       (this.container = new S(t.name)),
       this._addComponent(
@@ -994,9 +914,7 @@
         return r._addComponent(e)
       })
   }
-  ;(G.prototype.name && G.prototype.options) ||
-    G.prototype.delete ||
-    console.log('dc')
+  ;(G.prototype.name && G.prototype.options) || G.prototype.delete || console.log('dc')
   var K = '8.10.1'
   function Y(a) {
     var s = {},
@@ -1009,8 +927,7 @@
           var n = t
           void 0 === n.name && (n.name = M)
           t = n.name
-          if ('string' != typeof t || !t)
-            throw V.create('bad-app-name', { appName: String(t) })
+          if ('string' != typeof t || !t) throw V.create('bad-app-name', { appName: String(t) })
           if (y(s, t)) throw V.create('duplicate-app', { appName: t })
           n = new a(e, n, c)
           return (s[t] = n)
@@ -1022,26 +939,12 @@
           var i = r.match(/\s|\//),
             e = t.match(/\s|\//)
           i || e
-            ? ((n = [
-                'Unable to register library "' +
-                  r +
-                  '" with version "' +
-                  t +
-                  '":',
-              ]),
+            ? ((n = ['Unable to register library "' + r + '" with version "' + t + '":']),
               i &&
-                n.push(
-                  'library name "' +
-                    r +
-                    '" contains illegal characters (whitespace or "/")',
-                ),
+                n.push('library name "' + r + '" contains illegal characters (whitespace or "/")'),
               i && e && n.push('and'),
               e &&
-                n.push(
-                  'version name "' +
-                    t +
-                    '" contains illegal characters (whitespace or "/")',
-                ),
+                n.push('version name "' + t + '" contains illegal characters (whitespace or "/")'),
               W.warn(n.join(' ')))
             : o(
                 new O(
@@ -1055,8 +958,7 @@
         },
         setLogLevel: T,
         onLog: function (e, t) {
-          if (null !== e && 'function' != typeof e)
-            throw V.create('invalid-log-argument')
+          if (null !== e && 'function' != typeof e) throw V.create('invalid-log-argument')
           x(e, t)
         },
         apps: null,
@@ -1081,9 +983,7 @@
         r = n.name
       if (l.has(r))
         return (
-          W.debug(
-            'There were multiple attempts to register component ' + r + '.',
-          ),
+          W.debug('There were multiple attempts to register component ' + r + '.'),
           'PUBLIC' === n.type ? c[r] : null
         )
       l.set(r, n),
@@ -1096,11 +996,8 @@
           void 0 !== n.serviceProps && h(e, n.serviceProps),
           (c[r] = e),
           (a.prototype[r] = function () {
-            for (var e = [], t = 0; t < arguments.length; t++)
-              e[t] = arguments[t]
-            return this._getService
-              .bind(this, r)
-              .apply(this, n.multipleInstances ? e : [])
+            for (var e = [], t = 0; t < arguments.length; t++) e[t] = arguments[t]
+            return this._getService.bind(this, r).apply(this, n.multipleInstances ? e : [])
           }))
       for (var t = 0, i = Object.keys(s); t < i.length; t++) {
         var o = i[t]
@@ -1178,10 +1075,7 @@
     return (
       (function () {
         try {
-          return (
-            '[object process]' ===
-            Object.prototype.toString.call(global.process)
-          )
+          return '[object process]' === Object.prototype.toString.call(global.process)
         } catch (e) {
           return
         }
@@ -1206,9 +1100,5 @@
   ),
     q.registerVersion(B, '0.6.30', Q),
     q.registerVersion('fire-js', '')
-  return (
-    ee.registerVersion('firebase', '8.10.1', 'app'),
-    (ee.SDK_VERSION = '8.10.1'),
-    ee
-  )
+  return ee.registerVersion('firebase', '8.10.1', 'app'), (ee.SDK_VERSION = '8.10.1'), ee
 })

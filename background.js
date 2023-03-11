@@ -98,10 +98,7 @@ function generateKey(details, includeBody) {
         return `${details.method}:${formattedURL}:${hashCode(
           JSON.parse(
             decodeURIComponent(
-              String.fromCharCode.apply(
-                null,
-                new Uint8Array(details.requestBody.raw[0].bytes),
-              ),
+              String.fromCharCode.apply(null, new Uint8Array(details.requestBody.raw[0].bytes)),
             ),
           ),
         )}`
@@ -111,10 +108,7 @@ function generateKey(details, includeBody) {
         return `${details.method}:${formattedURL}:${hashCode(
           JSON.stringify(
             decodeURIComponent(
-              String.fromCharCode.apply(
-                null,
-                new Uint8Array(details.requestBody.raw[0].bytes),
-              ),
+              String.fromCharCode.apply(null, new Uint8Array(details.requestBody.raw[0].bytes)),
             ),
           ),
         )}`
@@ -122,9 +116,7 @@ function generateKey(details, includeBody) {
     }
 
     if (typeof includeBody === 'string') {
-      return `${details.method}:${formattedURL}:${hashCode(
-        JSON.stringify(includeBody),
-      )}`
+      return `${details.method}:${formattedURL}:${hashCode(JSON.stringify(includeBody))}`
     }
   }
 
@@ -134,11 +126,7 @@ function generateKey(details, includeBody) {
 function isGoodRequest(url, method) {
   if (!url || url.includes('chrome') || url.includes('lotties')) return false
   if (method && method === 'OPTIONS') return false
-  if (
-    url.includes('triplewhale.com') ||
-    url.includes('shopify') ||
-    url.includes('facebook')
-  )
+  if (url.includes('triplewhale.com') || url.includes('shopify') || url.includes('facebook'))
     return true
   return false
 }
@@ -190,8 +178,7 @@ chrome.storage.onChanged.addListener(function (changes) {
 // ----------
 let cachedEndpointBodies = {}
 const bodyRecordingFunction = function (details) {
-  const url =
-    details && details.url && details.url?.length > 0 ? details.url : false
+  const url = details && details.url && details.url?.length > 0 ? details.url : false
   const method = details && details.method ? details.method : false
 
   if (
@@ -208,10 +195,7 @@ const bodyRecordingFunction = function (details) {
     try {
       cachedEndpointBodies[key] = JSON.parse(
         decodeURIComponent(
-          String.fromCharCode.apply(
-            null,
-            new Uint8Array(details.requestBody.raw[0].bytes),
-          ),
+          String.fromCharCode.apply(null, new Uint8Array(details.requestBody.raw[0].bytes)),
         ),
       )
     } catch (e) {
@@ -222,8 +206,7 @@ const bodyRecordingFunction = function (details) {
 
 let cachedEndpointRequests = []
 const recordingFunction = function (details) {
-  const url =
-    details && details.url && details.url?.length > 0 ? details.url : false
+  const url = details && details.url && details.url?.length > 0 ? details.url : false
   const method = details && details.method ? details.method : false
 
   if (isGoodRequest(url, method)) {
@@ -264,19 +247,14 @@ const recordingFunction = function (details) {
               chrome.storage.local.set({ recordedRequests: recordedRequests })
               logger(`${details.method} request recorded: ${key}`, 'warning')
             } else {
-              logger(
-                `${details.method} request could not be recorded: ${key}`,
-                'error',
-              )
+              logger(`${details.method} request could not be recorded: ${key}`, 'error')
             }
 
             if (method === 'POST' || !res || res.error) {
               // As well as on failure,
               // always remove POST requests from cache
               // to allow for new POSTS requests with different bodies to be recorded
-              cachedEndpointRequests = cachedEndpointRequests.filter(
-                (item) => item !== cacheKey,
-              )
+              cachedEndpointRequests = cachedEndpointRequests.filter((item) => item !== cacheKey)
             }
           })
         })
@@ -299,8 +277,7 @@ const playbackFunction = function (req) {
     logger(`${req.method} request intercepted: ${key}`, 'success')
 
     return {
-      redirectUrl:
-        'data:text/html;charset=utf-8,' + encodeURIComponent(recordedResponse),
+      redirectUrl: 'data:text/html;charset=utf-8,' + encodeURIComponent(recordedResponse),
     }
   } else {
     logger(`No recorded response for ${key}`, 'error')
