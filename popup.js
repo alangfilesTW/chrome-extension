@@ -71,8 +71,8 @@ function sanitizeRequests(requests) {
   let keys = [
     //@TODO
     // - this is a common key
-    // - need to check other conditions before redacting
-    // 'name',
+    // - we have special name checks below
+    'name',
     'firstName',
     'lastName',
     'email',
@@ -86,11 +86,21 @@ function sanitizeRequests(requests) {
     'adsetName',
   ]
 
+  let allowedNameString = ['cdp/segment-members']
+
   Object.keys(req).forEach((key) => {
     keys.forEach((k) => {
       try {
         if (req[key].includes(k)) {
           const re = new RegExp(`"${k}":\s*"[^"]+?([^\/"]+)"`, 'g')
+
+          if (k === 'name') {
+            // if name, only allow strings provided above
+            if (allowedNameString.filter((string) => key.includes(string)).length <= 0) {
+              return
+            }
+          }
+
           req[key] = req[key].replaceAll(re, `"${k}":"[REDACTED]"`)
 
           // conditional to sift escaped quotes
@@ -212,6 +222,8 @@ document.addEventListener('DOMContentLoaded', function () {
     chrome.storage.local.get('recordedRequests', function (items) {
       const sanitizedRequests = sanitizeRequests(items.recordedRequests)
       chrome.storage.local.set({ recordedRequests: sanitizedRequests })
+
+      debugger
 
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.tabs.reload(tabs[0].id)
