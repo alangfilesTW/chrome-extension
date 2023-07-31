@@ -21,3 +21,11 @@
 #tw-extension select {
   width: 100%;
 }
+
+#tw-extension #version {
+  margin-top: 5px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 5px;
+}
