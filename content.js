@@ -43,6 +43,17 @@ function wrapRedacted() {
     }
   } catch {}
 
+  try {
+    // post purchase text
+    const ppt = contains('i', 'What are you using')
+    if (ppt.length > 0)
+      ppt.forEach((el) => {
+        if (!el.innerHTML.includes('[REDACTED]'))
+          el.innerHTML = 'What are you using <span>[REDACTED]</span> products for primarily?'
+      })
+  } catch {}
+
+  // backend and "default" redaction
   ;['[REDACTED]', '[REDACTED] [REDACTED]', shopName, fallbackShopName].forEach(function (text) {
     const redactedText = contains(
       'h1, h2, h3, h4, h5, h6, p, div, span, button, a, text',
@@ -67,19 +78,25 @@ function wrapRedacted() {
 // ----------
 document.addEventListener('DOMContentLoaded', function () {
   var styleSheet = document.createElement('style')
+  // css blurring
+  // and "last resort" css redaction
   styleSheet.innerText = `
-    [data-id="redacted"] {
+    [data-id="redacted"],
+    #tw-playback .orders-table #tr-pixel-order-widget-customer-name,
+    #tw-playback img[alt="shop logo"] .text-white
+    {
       filter: blur(3px);
     }
   `
   document.head.appendChild(styleSheet)
 })
 
-const config = { attributes: true, childList: true, subtree: true }
+const config = { attributes: false, childList: true, subtree: true }
 const observerCallback = (mutationList, observer) => {
   for (const mutation of mutationList) {
     if (mutation.type === 'childList') {
       wrapRedacted()
+      break
     } else if (mutation.type === 'attributes') {
       // wrapRedacted()
     }
@@ -87,12 +104,25 @@ const observerCallback = (mutationList, observer) => {
 }
 
 let observer = false
+let interval = 0
+function resetObserver() {
+  if (observer) observer.disconnect()
+  observer = new MutationObserver(observerCallback)
+  observer.observe(document.body, config)
+
+  // garbage collection
+  clearInterval(interval)
+  interval = setInterval(() => {
+    wrapRedacted()
+    resetObserver()
+  }, 1000 * 5)
+}
+
 function makeObserver(items) {
   if (observer) observer.disconnect()
 
   if (items.mode === 'playback') {
-    observer = new MutationObserver(observerCallback)
-    observer.observe(document.body, config)
+    resetObserver()
   }
 }
 
@@ -100,6 +130,7 @@ function makeObserver(items) {
 document.addEventListener('DOMContentLoaded', function () {
   chrome.storage.local.get('mode', function (items) {
     if (items.mode === 'playback') {
+      document.body.setAttribute('id', 'tw-playback')
       makeObserver(items)
     } else if (observer) {
       observer.disconnect()

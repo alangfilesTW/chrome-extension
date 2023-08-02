@@ -90,6 +90,8 @@ function sanitizeRequests(requests) {
     'segment-members',
     // store data
     'get-customers',
+    // customer data
+    'get-orders',
   ]
 
   Object.keys(req).forEach((key) => {
