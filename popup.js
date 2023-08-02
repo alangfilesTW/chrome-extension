@@ -69,8 +69,7 @@ function setRecordings(recordings) {
 function sanitizeRequests(requests) {
   let req = requests
   let keys = [
-    //@TODO
-    // - this is a common key
+    // - 'name' is a common key
     // - we have special name checks below
     'name',
     'firstName',
@@ -86,7 +85,12 @@ function sanitizeRequests(requests) {
     'adsetName',
   ]
 
-  let allowedNameString = ['cdp/segment-members']
+  let allowedNameString = [
+    // cdp
+    'segment-members',
+    // store data
+    'get-customers',
+  ]
 
   Object.keys(req).forEach((key) => {
     keys.forEach((k) => {
@@ -94,7 +98,7 @@ function sanitizeRequests(requests) {
         if (req[key].includes(k)) {
           const re = new RegExp(`"${k}":\s*"[^"]+?([^\/"]+)"`, 'g')
 
-          if (k === 'name') {
+          if (k === 'name' || k === 'productName') {
             // if name, only allow strings provided above
             if (allowedNameString.filter((string) => key.includes(string)).length <= 0) {
               return
