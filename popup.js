@@ -1,4 +1,10 @@
 // ----------
+// Constants
+// ----------
+const tableRef = 'recordings'
+// const tableRef = 'staging_recordings'
+
+// ----------
 // Helpers
 // ----------
 function formatBytes(bytes, decimals = 2) {
@@ -16,7 +22,7 @@ function formatBytes(bytes, decimals = 2) {
 function setSizes() {
   chrome.storage.local.get('recordedRequests', function (items) {
     const size = JSON.stringify(items.recordedRequests || '').length
-    if (size > 1000000 || size <= 2) {
+    if (items.recordedRequests.length > 500 || size <= 2) {
       document.getElementById('save').disabled = true
     } else {
       document.getElementById('save').disabled = false
@@ -125,7 +131,7 @@ function sanitizeRequests(requests) {
 
 function getRecordings(db) {
   try {
-    db.collection('recordings')
+    db.collection(tableRef)
       .get()
       .then((snapshot) => {
         const data = snapshot.docs.map((doc) => doc.data())
@@ -262,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function () {
           // if greater than 1mb
           // then reference it below
           // https://firebase.google.com/docs/storage/web/upload-files
-          db.collection('recordings')
+          db.collection(tableRef)
             .add({
               date: new Date(),
               title: tab.title,
